@@ -1,6 +1,6 @@
-package expo.util;
+package expo.util
 
-public enum Button {
+enum class Button {
     A,
     B,
     X,
