@@ -11,7 +11,7 @@ abstract class ExpoOpMode : LinearOpMode() {
         robot.initialize(this)
         controller1 = ExpoGamepad(gamepad1)
         controller2 = ExpoGamepad(gamepad2)
-
+        waitForStart()
     }
 
 }

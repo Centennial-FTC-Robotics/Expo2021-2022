@@ -45,19 +45,27 @@ class ExpoGamepad(private val gamepad: Gamepad) {
         }
     }
 
-    fun getLeftX(): Float {
-        return gamepad.left_stick_x
+    fun getLeftX(): Double {
+        return gamepad.left_stick_x.toDouble()
     }
 
-    fun getLeftY(): Float {
-        return gamepad.left_stick_y
+    fun getLeftY(): Double {
+        return gamepad.left_stick_y.toDouble()
     }
 
-    fun getRightX(): Float {
-        return gamepad.right_stick_x
+    fun getRightX(): Double {
+        return gamepad.right_stick_x.toDouble()
     }
 
-    fun getRightY(): Float {
-        return gamepad.right_stick_y
+    fun getRightY(): Double {
+        return gamepad.right_stick_y.toDouble()
+    }
+
+    fun getControllerVector(): Vector = Vector(getLeftX(), getLeftY())
+
+    fun getControllerVector(angle: Double): Vector {
+        val controlVector = Vector(getLeftX(), getLeftY())
+        controlVector.rotate(angle)
+        return controlVector
     }
 }

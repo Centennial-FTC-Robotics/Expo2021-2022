@@ -19,6 +19,5 @@ class ButtonToggle(private val gamepad: ExpoGamepad, private val button: Button,
         if (!last && current) toggle = !toggle
     }
 
-
     fun getValue() = toggle
 }
