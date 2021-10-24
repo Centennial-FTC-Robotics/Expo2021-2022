@@ -42,7 +42,7 @@ class Vector(private var x: Double, private var y: Double) {
         if (x == 0.0 && y == 0.0) {
             theta = 0.0
         } else if (x == 0.0) {
-            theta = Math.PI / 2
+            theta = Math.PI / 2F
             if (y < 0) theta *= -1.0
         } else if (y == 0.0) {
             theta = Math.PI
@@ -57,7 +57,7 @@ class Vector(private var x: Double, private var y: Double) {
     }
 
     fun findR() {
-        R = sqrt(x.pow(2.0) + y.pow(2.0))
+        R = sqrt(x.pow(2) + y.pow(2))
     }
 
     fun getX(): Double {

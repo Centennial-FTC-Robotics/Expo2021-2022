@@ -11,8 +11,6 @@ class ExpoGamepadTest : ExpoOpMode() {
 
         controller1.registerToggle(Button.A)
 
-        waitForStart()
-
         while (opModeIsActive()) {
             controller1.update()
 
