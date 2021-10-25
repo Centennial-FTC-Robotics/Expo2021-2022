@@ -14,4 +14,9 @@ abstract class ExpoOpMode : LinearOpMode() {
         waitForStart()
     }
 
+    protected fun updateGamepads() {
+        controller1.update()
+        controller2.update()
+    }
+
 }
