@@ -16,6 +16,11 @@ class Drivetrain : Subsystem {
         frontRight = opMode.hardwareMap.dcMotor.get("frontRight")
         backLeft = opMode.hardwareMap.dcMotor.get("backLeft")
         backRight = opMode.hardwareMap.dcMotor.get("backRight")
+
+        frontLeft.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+        frontRight.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+        backLeft.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+        backRight.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
     }
 
     public fun setMotorPowers(frontLeft: Double, frontRight: Double, backLeft: Double, backRight: Double) {
