@@ -12,7 +12,7 @@ class ExpoGamepadTest : ExpoOpMode() {
         controller1.registerToggle(Button.A)
 
         while (opModeIsActive()) {
-            controller1.update()
+            updateGamepads()
 
             telemetry.addData("A Toggle", controller1.getToggle(Button.A))
             telemetry.update()
