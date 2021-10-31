@@ -23,10 +23,10 @@ class PIDController(private var kP: Double, private var kI: Double, private var 
 
     fun update(error: Double): Double {
         val dt = time.milliseconds()
+        time.reset()
         integral += error * dt
         val derivative = (error - lastError) / dt
         lastError = error
-        time.reset()
 
         //antiwindup
         if (abs(integral) > 1.0) {
