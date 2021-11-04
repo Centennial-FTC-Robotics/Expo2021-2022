@@ -6,21 +6,12 @@ import expo.subsystems.Drivetrain
 import expo.subsystems.Intake
 
 class Robot {
-    companion object {
-        @JvmField
-        val drivetrain = Drivetrain()
+    private val drivetrain = Drivetrain()
+    private val intake = Intake()
+    private val spinner = CarouselSpinner()
+    private val IMU = expo.subsystems.IMU()
 
-        @JvmField
-        val intake = Intake()
-
-        @JvmField
-        val spinner = CarouselSpinner()
-
-        @JvmField
-        val IMU = expo.subsystems.IMU()
-
-        private val subsystems = arrayOf(drivetrain, intake, spinner, IMU)
-    }
+    private val subsystems = arrayOf(drivetrain, intake, spinner, IMU)
 
     fun initialize(opMode: LinearOpMode) {
         for (subsystem: Subsystem in subsystems)
