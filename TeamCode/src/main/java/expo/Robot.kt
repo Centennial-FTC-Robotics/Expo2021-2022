@@ -19,7 +19,10 @@ class Robot {
         @JvmField
         val IMU = expo.subsystems.IMU()
 
-        private val subsystems = arrayOf(drivetrain, intake, spinner, IMU)
+        @JvmField
+        val outreachServo = expo.subsystems.OutreachServo()
+
+        private val subsystems = arrayOf(drivetrain, intake, spinner, IMU, outreachServo)
     }
 
     fun initialize(opMode: LinearOpMode) {
