@@ -22,8 +22,7 @@ class ExpoGamepad(private val gamepad: Gamepad) {
     }
 
     fun getToggle(button: Button): Boolean {
-        val toggle: ButtonToggle = toggles[button] ?: return false
-        return toggle.getValue()
+        return toggles.getValue(button).getValue()
     }
 
     fun getButton(button: Button): Boolean {
