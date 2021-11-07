@@ -2,9 +2,11 @@ package expo.util
 
 import com.qualcomm.robotcore.hardware.Gamepad
 import java.util.*
+import kotlin.collections.HashMap
 
 class ExpoGamepad(private val gamepad: Gamepad) {
     var toggles = HashMap<Button, ButtonToggle>()
+    var pressedButtons = HashMap<Button, PressedButton>()
 
     fun update() {
         for (entry: Map.Entry<Button, ButtonToggle> in toggles.entries) {
@@ -20,6 +22,13 @@ class ExpoGamepad(private val gamepad: Gamepad) {
     fun registerToggle(button: Button, state: Boolean) {
         toggles[button] = ButtonToggle(this, button, state)
     }
+
+    fun registerPressedButton(button: Button) {
+        pressedButtons[button] = PressedButton(this, button)
+    }
+
+    fun getPressedButton(button: Button) = pressedButtons.getValue((button)).getState()
+
 
     fun getToggle(button: Button): Boolean {
         return toggles.getValue(button).getValue()

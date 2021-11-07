@@ -8,6 +8,4 @@ class Intake : Subsystem {
     override fun initialize(opMode: LinearOpMode) {
 
     }
-
-
 }
