@@ -15,4 +15,5 @@ enum class Button {
     RIGHT_BUMPER,
     LEFT_STICK,
     RIGHT_STICK
+
 }
