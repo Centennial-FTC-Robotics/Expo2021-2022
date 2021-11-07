@@ -6,10 +6,10 @@ import expo.subsystems.Drivetrain
 import expo.subsystems.Intake
 
 class Robot {
-    private val drivetrain = Drivetrain()
-    private val intake = Intake()
-    private val spinner = CarouselSpinner()
-    private val IMU = expo.subsystems.IMU()
+    val drivetrain = Drivetrain()
+    val intake = Intake()
+    val spinner = CarouselSpinner()
+    val IMU = expo.subsystems.IMU()
 
     private val subsystems = arrayOf(drivetrain, intake, spinner, IMU)
 
