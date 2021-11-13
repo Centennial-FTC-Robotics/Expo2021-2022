@@ -2,16 +2,23 @@ package expo.subsystems
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.DcMotor
+import com.qualcomm.robotcore.hardware.DcMotorSimple
+import expo.PIDController
+import expo.Robot
 import expo.Subsystem
+import expo.util.Vector
+import org.firstinspires.ftc.robotcore.external.Telemetry
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 
 class Drivetrain : Subsystem {
     private lateinit var frontLeft: DcMotor
     private lateinit var frontRight: DcMotor
     private lateinit var backLeft: DcMotor
     private lateinit var backRight: DcMotor
-    public var odoLoopCount: Int
+    private var odoLoopCount = 0
     private val IMU_ANGLE_SYNC_RATE: Int = 3
     private lateinit var opMode: LinearOpMode
+    private lateinit var motors: Array<DcMotor>
 
     private val ticksPerRotation = 537.6
     private val wheelDiameter = 3.937
@@ -19,11 +26,11 @@ class Drivetrain : Subsystem {
     private val distanceInWheelRotation: Double = wheelDiameter * Math.PI
     private val ticksPerInch = distanceInWheelRotation / ticksPerWheelRotation
 
-    private val xController: PIDController = PIDController(.12f, .01f, 0f)
-    private val yController: PIDController = PIDController(.12f, .007f, 0.01f)
-    private val angleController: PIDController = PIDController(.06f, 0.008f, 0.12f)
+    private val xController: PIDController = PIDController(.12, .01, 0.0)
+    private val yController: PIDController = PIDController(.12, .007, 0.01)
+    private val angleController: PIDController = PIDController(.06, 0.008, 0.12)
 
-    private val turnController: PIDController = PIDController(1 / 150f, 0.006f, 0.001f)
+    private val turnController: PIDController = PIDController(1.0 / 150, 0.006, 0.001)
 
     private var currentPos: Vector? = null
     private var robotCentric: Vector? = null
@@ -48,14 +55,12 @@ class Drivetrain : Subsystem {
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE)
 
         motors = arrayOf<DcMotor>(frontLeft, frontRight, backLeft, backRight)
-        odoLoopCount = 0
-
-        angleController.setMaxI(1.7)
+        
     }
 
     fun updatePos() {
         if (odoLoopCount % IMU_ANGLE_SYNC_RATE == 0) {
-            val angle: Double = Robot.imu.getAngle()
+            val angle: Double = Robot.IMU.getAngle()
             Robot.odometry.setAngleCorrection(Math.toRadians(angle))
         }
         Robot.odometry.updatePos()
@@ -109,7 +114,7 @@ class Drivetrain : Subsystem {
             currentAngle = Math.toDegrees(Robot.odometry.getHeading())
             error = getAngleDist(currentAngle, targetAngle)
             direction = getAngleDir(currentAngle, targetAngle)
-            turnRate = turnController.getPower(error.toFloat())
+            turnRate = turnController.update(error.toDouble())
             turnRate = clip(turnRate, maxSpeed, minSpeed)
             opMode.telemetry.addData("error", error)
             opMode.telemetry.addData("turnRate", turnRate)
@@ -201,12 +206,11 @@ class Drivetrain : Subsystem {
         currentPos = Robot.odometry.getPos()
         opMode.telemetry.addData("target", targetPos)
         opMode.telemetry.addData("current", currentPos)
-        val ydiff: Double = Math.abs(targetPos.getY() - currentPos.getY())
-        val xdiff: Double = Math.abs(targetPos.getX() - currentPos.getX())
-        PIDController.setUseI(Math.hypot(ydiff, xdiff) <= 5)
+        val ydiff: Double = Math.abs(targetPos.getY() - currentPos!!.getY())
+        val xdiff: Double = Math.abs(targetPos.getX() - currentPos!!.getX())
         getMotorPowers(targetPos, heading)
-        var diag1: Double = power.getComponent(0)
-        var diag2: Double = power.getComponent(1)
+        var diag1: Double = power!!.getX()
+        var diag2: Double = power!!.getY()
         val headingDiff = getAngleDist(heading, Math.toDegrees(Robot.odometry.getHeading()))
         val maxValue: Double = Math.max(diag1, diag2)
         if (maxValue > maxSpeed) {
@@ -237,13 +241,11 @@ class Drivetrain : Subsystem {
         item = if (item == null) {
             opMode.telemetry.addData("ydiff", yDiff)
         } else {
-            item.setRetained(false)
+            item!!.setRetained(false)
             opMode.telemetry.addData("ydiff", yDiff)
         }
-        item.setRetained(true)
+        item!!.setRetained(true)
         opMode.telemetry.addData("angle diff", headingDiff)
-        opMode.telemetry.addData("x I", xController.getI())
-        opMode.telemetry.addData("y I", yController.getI())
         opMode.telemetry.update()
         if (Math.abs(xDiff) < tolerance && Math.abs(yDiff) < tolerance && Math.abs(headingDiff) < headingTolerance || !opMode.opModeIsActive()) {
             setMotorPowers(0.0, 0.0, 0.0)
@@ -264,23 +266,23 @@ class Drivetrain : Subsystem {
         opMode.telemetry.addData("current angle", Math.toDegrees(Robot.odometry.getHeading()))
         opMode.telemetry.addData("target angle", targetAngle)
         robotCentric = Vector(
-            -xController.getPower(error.getComponent(0).doubleValue() as Float) as Double,
-            yController.getPower(error.getComponent(1).doubleValue() as Float) as Double
+            -xController.update(error.getX()),
+            yController.update(error.getY())
         )
         opMode.telemetry.addData("robot centric powers", robotCentric)
-        anglePower = angleController.getPower(
+        anglePower = angleController.update(
             getAngleDist(
                 targetAngle,
                 Math.toDegrees(Robot.odometry.getHeading())
-            ).toFloat()
+            )
         )
-        val leftx: Double = robotCentric.getComponent(0)
-        val lefty: Double = robotCentric.getComponent(1)
+        val leftx: Double = robotCentric!!.getX()
+        val lefty: Double = robotCentric!!.getY()
         val scalar: Double = Math.max(
             Math.abs(lefty - leftx),
             Math.abs(lefty + leftx)
         ) //scalar and magnitude scale the motor powers based on distance from joystick origin
-        val magnitude: Double = Math.sqrt(Math.pow(lefty, 2) + Math.pow(leftx, 2))
+        val magnitude: Double = Math.sqrt(Math.pow(lefty, 2.0) + Math.pow(leftx, 2.0))
         power = Vector((lefty + leftx) * magnitude / scalar, (lefty - leftx) * magnitude / scalar)
         //
         opMode.telemetry.addData("x power", leftx)
