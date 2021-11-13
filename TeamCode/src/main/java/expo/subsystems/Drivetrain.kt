@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import expo.Subsystem
 
 class Drivetrain : Subsystem {
-    //TODO: danylo
     private lateinit var frontLeft: DcMotor
     private lateinit var frontRight: DcMotor
     private lateinit var backLeft: DcMotor
