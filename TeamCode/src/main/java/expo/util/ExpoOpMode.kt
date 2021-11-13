@@ -5,9 +5,11 @@ import expo.Robot
 
 abstract class ExpoOpMode : LinearOpMode() {
     protected val robot: Robot = Robot()
-    protected lateinit var controller1 : ExpoGamepad
+    protected lateinit var controller1: ExpoGamepad
     protected lateinit var controller2: ExpoGamepad
     override fun runOpMode() {
+        robot.motorTester.setMotorName("intake test")
+        robot.motorTester.initialize(this)
         robot.initialize(this)
         controller1 = ExpoGamepad(gamepad1)
         controller2 = ExpoGamepad(gamepad2)
