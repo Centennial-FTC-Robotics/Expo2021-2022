@@ -1,26 +1,18 @@
 package expo
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
-import expo.subsystems.CarouselSpinner
-import expo.subsystems.Drivetrain
-import expo.subsystems.Intake
+import expo.subsystems.*
 
 class Robot {
-    companion object {
-        @JvmField
-        val drivetrain = Drivetrain()
+    val drivetrain = Drivetrain()
+    val intake = Intake()
+    val spinner = CarouselSpinner()
+    val IMU = IMU()
+    val openCV = OpenCV()
+    val outtake = Outtake()
+    val motorTester = MotorTester()
 
-        @JvmField
-        val intake = Intake()
-
-        @JvmField
-        val spinner = CarouselSpinner()
-
-        @JvmField
-        val IMU = expo.subsystems.IMU()
-
-        private val subsystems = arrayOf(drivetrain, intake, spinner, IMU)
-    }
+    private val subsystems = listOf(drivetrain, intake, spinner, IMU, openCV, outtake)
 
     fun initialize(opMode: LinearOpMode) {
         for (subsystem: Subsystem in subsystems)
