@@ -8,13 +8,13 @@ abstract class ExpoOpMode : LinearOpMode() {
     protected lateinit var controller2: ExpoGamepad
     protected lateinit var robot: Robot
     override fun runOpMode() {
+        robot = Robot
         Robot.motorTester.setMotorName("intake test")
         Robot.motorTester.initialize(this)
         Robot.initialize(this)
         controller1 = ExpoGamepad(gamepad1)
         controller2 = ExpoGamepad(gamepad2)
         waitForStart()
-        robot = Robot
     }
 
     protected fun updateGamepads() {
