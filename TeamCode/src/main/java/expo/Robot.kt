@@ -3,7 +3,7 @@ package expo
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import expo.subsystems.*
 
-class Robot {
+object Robot {
     val drivetrain = Drivetrain()
     val intake = Intake()
     val spinner = CarouselSpinner()
