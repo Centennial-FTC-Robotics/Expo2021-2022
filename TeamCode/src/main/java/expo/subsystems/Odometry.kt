@@ -12,7 +12,6 @@ class Odometry : Subsystem {
     private lateinit var back: DcMotor
     private lateinit var middle: DcMotor
 
-
     //TODO: these values
     private var backRadius = 0.0
     private var middleRadius = 0.0
@@ -40,7 +39,7 @@ class Odometry : Subsystem {
         this.theta = theta
     }
 
-    fun update() {
+    override fun update() {
         currentBack = back.currentPosition
         currentMiddle = middle.currentPosition
         currentTheta = Robot.IMU.getAngle()
