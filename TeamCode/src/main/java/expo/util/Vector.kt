@@ -67,4 +67,18 @@ class Vector(private var x: Double, private var y: Double) {
     fun getY(): Double {
         return y
     }
+    companion object {
+        fun add(v1: Vector, v2: Vector): Vector {
+            val copy = Vector(v1.getX(), v1.getY())
+            copy.add(v2)
+            return copy
+        }
+
+        fun sub(v1: Vector, v2: Vector): Vector {
+            val copy = Vector(v1.getX(), v1.getY())
+            copy.sub(v2)
+            return copy
+        }
+
+    }
 }
