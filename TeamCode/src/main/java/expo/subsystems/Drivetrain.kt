@@ -58,12 +58,13 @@ class Drivetrain : Subsystem {
         
     }
 
+    //in the future this will be done by the command manager but for now its fine
     fun updatePos() {
         if (odoLoopCount % IMU_ANGLE_SYNC_RATE == 0) {
             val angle: Double = Robot.IMU.getAngle()
             Robot.odometry.setAngleCorrection(Math.toRadians(angle))
         }
-        Robot.odometry.updatePos()
+        Robot.odometry.update()
         odoLoopCount++
     }
 
@@ -110,7 +111,7 @@ class Drivetrain : Subsystem {
         var error = Double.MAX_VALUE
         turnController.reset()
         while (opMode.opModeIsActive() && Math.abs(error) > tolerance) {
-            updatePos()
+            update()
             currentAngle = Math.toDegrees(Robot.odometry.getHeading())
             error = getAngleDist(currentAngle, targetAngle)
             direction = getAngleDir(currentAngle, targetAngle)
@@ -202,7 +203,7 @@ class Drivetrain : Subsystem {
         tolerance: Double,
         headingTolerance: Double
     ): Boolean {
-        updatePos()
+        update()
         currentPos = Robot.odometry.getPos()
         opMode.telemetry.addData("target", targetPos)
         opMode.telemetry.addData("current", currentPos)
@@ -230,7 +231,7 @@ class Drivetrain : Subsystem {
             Math.toDegrees(Robot.odometry.getHeading())
         ).toDouble()
         setMotorPowers(diag1, diag2, anglePower)
-        val error: Vector = Vector.sub(targetPos, currentPos)
+        val error: Vector = Vector.sub(targetPos, currentPos!!)
         val xDiff: Double = error.getX()
         val yDiff: Double = error.getY()
         //        headingDiff = 0;
@@ -258,7 +259,7 @@ class Drivetrain : Subsystem {
     }
 
     fun getMotorPowers(targetPosition: Vector?, targetAngle: Double) {
-        val error: Vector = Vector.sub(targetPosition, currentPos)
+        val error: Vector = Vector.sub(targetPosition!!, currentPos!!)
         opMode.telemetry.addData("field centric error", error)
         val heading: Double = Robot.odometry.getHeading()
         error.rotate(heading)
