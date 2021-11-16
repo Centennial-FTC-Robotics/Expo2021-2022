@@ -1,9 +1,6 @@
 package expo.util
 
-import kotlin.math.cos
-import kotlin.math.pow
-import kotlin.math.sin
-import kotlin.math.sqrt
+import kotlin.math.*
 
 
 class Vector(private var x: Double, private var y: Double) {
@@ -38,20 +35,26 @@ class Vector(private var x: Double, private var y: Double) {
     }
 
     private fun findTheta() {
-        findXY()
+        findR()
         if (x == 0.0 && y == 0.0) {
             theta = 0.0
-        } else if (x == 0.0) {
-            theta = Math.PI / 2F
-            if (y < 0) theta *= -1.0
-        } else if (y == 0.0) {
-            theta = Math.PI
         } else {
-            theta = Math.atan(y / x)
-            if (y > 0) {
-                theta += Math.PI
+            if (x == 0.0) {
+                theta = Math.PI / 2
+                if (y < 0) {
+                    theta *= -1.0
+                }
             } else {
-                theta -= Math.PI
+                theta = atan(y / x)
+                if (x < 0) {
+                    if (y >= 0) {
+                        theta += Math.PI
+                    } else if (y < 0) {
+                        theta -= Math.PI
+                    } else {
+                        theta = Math.PI
+                    }
+                }
             }
         }
     }
@@ -67,6 +70,7 @@ class Vector(private var x: Double, private var y: Double) {
     fun getY(): Double {
         return y
     }
+
     companion object {
         fun add(v1: Vector, v2: Vector): Vector {
             val copy = Vector(v1.getX(), v1.getY())
