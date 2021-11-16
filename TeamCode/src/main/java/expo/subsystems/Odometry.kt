@@ -19,6 +19,7 @@ class Odometry : Subsystem {
     private var backRadius = 7.9
     private var middleRadius = 4.528
 
+
     private var oldBack = 0
     private var oldMiddle = 0
     private var oldTheta = 0.0
@@ -40,6 +41,7 @@ class Odometry : Subsystem {
     override fun initialize(opMode: LinearOpMode) {
         back = opMode.hardwareMap.dcMotor["back odo"]
         middle = opMode.hardwareMap.dcMotor["intake"]
+
         this.opMode = opMode
 
         back.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
@@ -49,7 +51,6 @@ class Odometry : Subsystem {
 
         x = 0.0
         y = 0.0
-
     }
 
     fun setStartPos(x: Double, y: Double, theta: Double) {
@@ -72,6 +73,10 @@ class Odometry : Subsystem {
         val deltaMiddle = ((middle.currentPosition * midDir) - oldMiddle).toDouble()
         val deltaTheta = currentTheta - oldTheta
 
+        oldBack = back.currentPosition * backDir
+        oldMiddle = middle.currentPosition * midDir
+        oldTheta = currentTheta
+
         theta = normalizeRadians(angleCorrection + deltaTheta)
 
         var deltaX: Double
@@ -84,8 +89,12 @@ class Odometry : Subsystem {
             val strafeRadius = (deltaBack / deltaTheta) - backRadius
             val turnRadius = (deltaMiddle / deltaTheta) - middleRadius
 
+
+//            deltaX = turnRadius * sin(deltaTheta) + strafeRadius * (1 - cos(deltaTheta))
+//            deltaY = turnRadius * (cos(deltaTheta) - 1) + strafeRadius * sin(deltaTheta)
             deltaX = turnRadius * (cos(deltaTheta) - 1) + strafeRadius * sin(deltaTheta)
             deltaY = turnRadius * sin(deltaTheta) + strafeRadius * (1 - cos(deltaTheta))
+
         }
 
         val fieldCentric = Vector(deltaX / ENCODER_COUNTS_PER_INCH, deltaY / ENCODER_COUNTS_PER_INCH)
@@ -123,7 +132,6 @@ class Odometry : Subsystem {
     fun setAngleCorrection(angleCorrection: Double) {
         this.angleCorrection = angleCorrection
     }
-
 
     fun getEncoders(): Pair<Int, Int> {
         return Pair(middle.currentPosition, back.currentPosition)
