@@ -9,9 +9,13 @@ object Robot {
     val spinner = CarouselSpinner()
     val IMU = IMU()
     val openCV = OpenCV()
-    val motorTester = MotorTester()
+    val touchSensor = TouchSensor()
+    val odoLifter = OdometryLifter()
+    val odometry = Odometry()
+    val outtake = Outtake()
 
-    private val subsystems = listOf(drivetrain, intake, spinner, IMU, openCV)
+    private val subsystems = listOf(intake, drivetrain, touchSensor, odoLifter, odometry, outtake, IMU)
+
     fun initialize(opMode: LinearOpMode) {
         for (subsystem: Subsystem in subsystems)
             subsystem.initialize(opMode)
