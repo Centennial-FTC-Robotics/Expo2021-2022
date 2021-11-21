@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple
 import expo.PIDController
 import expo.Robot
 import expo.Subsystem
+import expo.commands.Command
 import expo.util.Vector
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
@@ -55,7 +56,7 @@ class Drivetrain : Subsystem {
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE)
 
         motors = arrayOf<DcMotor>(frontLeft, frontRight, backLeft, backRight)
-        
+
     }
 
     //in the future this will be done by the command manager but for now its fine
@@ -173,6 +174,24 @@ class Drivetrain : Subsystem {
 
     fun moveToPosition(targetPos: Vector, heading: Double): Boolean {
         return moveToPosition(targetPos, heading, .5, .05, .3, 1.0, 1.5)
+    }
+
+    inner class MoveToPositionCommand : Command {
+        lateinit var targetPos: Vector;
+        var heading: Double = 0.0;
+
+        constructor(targetPos: Vector, heading: Double) {
+            this.targetPos = targetPos;
+            this.heading = heading;
+        }
+
+        override fun update() {
+            Drivetrain().moveToPosition(targetPos, heading);
+        }
+    }
+
+    fun getMoveToPositionCommand(targetPos: Vector, heading: Double): Command {
+        return this.MoveToPositionCommand(targetPos, heading);
     }
 
     fun moveToPosition(
