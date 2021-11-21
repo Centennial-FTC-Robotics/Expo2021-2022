@@ -179,6 +179,8 @@ class Drivetrain : Subsystem {
     inner class MoveToPositionCommand : Command {
         lateinit var targetPos: Vector;
         var heading: Double = 0.0;
+        override var isFinished: Boolean = false
+            get() = isFinished
 
         constructor(targetPos: Vector, heading: Double) {
             this.targetPos = targetPos;
@@ -186,7 +188,7 @@ class Drivetrain : Subsystem {
         }
 
         override fun update() {
-            Drivetrain().moveToPosition(targetPos, heading);
+            isFinished = Drivetrain().moveToPosition(targetPos, heading);
         }
     }
 
