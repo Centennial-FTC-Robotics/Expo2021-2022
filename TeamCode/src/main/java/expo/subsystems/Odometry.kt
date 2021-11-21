@@ -32,6 +32,7 @@ class Odometry : Subsystem {
     private var theta = 0.0
 
     private var angleCorrection = 0.0
+
     private val ENCODER_COUNTS_PER_INCH = 8192.0 / (2 * Math.PI * 1.0)
 
 
