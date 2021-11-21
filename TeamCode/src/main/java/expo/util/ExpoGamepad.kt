@@ -1,5 +1,6 @@
 package expo.util
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.Gamepad
 import java.util.*
 import kotlin.collections.HashMap
@@ -13,6 +14,7 @@ class ExpoGamepad(private val gamepad: Gamepad) {
             val toggle: ButtonToggle = entry.value
             toggle.update()
         }
+
     }
 
     fun registerToggle(button: Button) {
@@ -58,7 +60,7 @@ class ExpoGamepad(private val gamepad: Gamepad) {
     }
 
     fun getLeftY(): Double {
-        return gamepad.left_stick_y.toDouble()
+        return -gamepad.left_stick_y.toDouble()
     }
 
     fun getRightX(): Double {
@@ -75,5 +77,28 @@ class ExpoGamepad(private val gamepad: Gamepad) {
         val controlVector = Vector(getLeftX(), getLeftY())
         controlVector.rotate(angle)
         return controlVector
+    }
+
+    fun rumble(left: Double, right: Double, duration: Int) {
+        gamepad.rumble(left, right, duration)
+    }
+
+    fun rumble(duration: Int) {
+        gamepad.rumble(duration)
+    }
+
+    fun rumbleBlips(count: Int) {
+        gamepad.rumbleBlips(count)
+    }
+
+    fun rumbleCustom(customEffect: Gamepad.RumbleEffect) {
+        gamepad.runRumbleEffect(customEffect)
+    }
+
+    fun printControlVector(opMode: LinearOpMode) {
+        val vector = getControllerVector()
+        opMode.telemetry.addData("leftX", vector.getX())
+        opMode.telemetry.addData("leftY", vector.getY())
+
     }
 }
