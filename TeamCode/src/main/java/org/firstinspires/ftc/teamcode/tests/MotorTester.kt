@@ -22,10 +22,10 @@ class MotorTester : ExpoOpMode() {
             if (controller1.getPressedButton(Button.DOWN))
                 power -= .2
 
-            if (controller1.getButton(Button.A))
-                robot.motorTester.setPower(power)
-            else
-                robot.motorTester.setPower(0.0)
+//            if (controller1.getButton(Button.A))
+//                robot.motorTester.setPower(power)
+//            else
+//                robot.motorTester.setPower(0.0)
 
             telemetry.addData("Power", power)
             telemetry.update()
