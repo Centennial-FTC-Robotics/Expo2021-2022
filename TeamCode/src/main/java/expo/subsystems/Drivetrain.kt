@@ -6,10 +6,12 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple
 import expo.PIDController
 import expo.Robot
 import expo.Subsystem
+import expo.commands.Command
 import expo.util.Vector
-import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import kotlin.math.abs
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 class Drivetrain : Subsystem {
     private lateinit var frontLeft: DcMotor
@@ -33,12 +35,10 @@ class Drivetrain : Subsystem {
 
     private val turnController: PIDController = PIDController(1.0 / 150, 0.006, 0.001)
 
-    private var currentPos: Vector? = null
-    private var robotCentric: Vector? = null
-    private var power: Vector? = null
+    private var currentPos = Vector(0.0, 0.0)
+    private var robotCentric = Vector(0.0, 0.0)
+    private var power: Vector = Vector(0.0, 0.0)
     private var anglePower = 0.0
-
-    private var item: Telemetry.Item? = null
 
     override fun initialize(opMode: LinearOpMode) {
         this.opMode = opMode
@@ -47,13 +47,13 @@ class Drivetrain : Subsystem {
         backLeft = opMode.hardwareMap.dcMotor.get("backLeft")
         backRight = opMode.hardwareMap.dcMotor.get("backRight")
 
-        backRight.setDirection(DcMotorSimple.Direction.REVERSE)
-        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE)
+        backRight.direction = DcMotorSimple.Direction.REVERSE
+        frontLeft.direction = DcMotorSimple.Direction.REVERSE
 
-        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE)
-        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE)
-        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE)
-        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE)
+        frontLeft.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+        frontRight.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+        backLeft.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+        backRight.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
 
         motors = arrayOf(frontLeft, frontRight, backLeft, backRight)
 
@@ -65,24 +65,15 @@ class Drivetrain : Subsystem {
             val angle: Double = Robot.IMU.getAngle()
             Robot.odometry.setAngleCorrection(Math.toRadians(angle))
         }
-        Robot.odometry.calcLinearOdo()
-        odoLoopCount++
-    }
-
-    fun updateArcPos() {
-        if (odoLoopCount % IMU_ANGLE_SYNC_RATE == 0) {
-            val angle: Double = Robot.IMU.getAngle()
-            Robot.odometry.setAngleCorrection(Math.toRadians(angle))
-        }
         Robot.odometry.update()
         odoLoopCount++
     }
 
     fun setPowers(frontLeft: Double, frontRight: Double, backLeft: Double, backRight: Double) {
-        this.frontLeft.setPower(frontLeft)
-        this.frontRight.setPower(frontRight)
-        this.backLeft.setPower(backLeft)
-        this.backRight.setPower(backRight)
+        this.frontLeft.power = frontLeft
+        this.frontRight.power = frontRight
+        this.backLeft.power = backLeft
+        this.backRight.power = backRight
     }
 
     fun setPowers(
@@ -90,12 +81,12 @@ class Drivetrain : Subsystem {
         frontRight: Double,
         backLeft: Double,
         backRight: Double,
-        factor: Double
+        factor: Float
     ) {
-        this.frontLeft.setPower(frontLeft * factor)
-        this.frontRight.setPower(frontRight * factor)
-        this.backLeft.setPower(backLeft * factor)
-        this.backRight.setPower(backRight * factor)
+        this.frontLeft.power = frontLeft * factor
+        this.frontRight.power = frontRight * factor
+        this.backLeft.power = backLeft * factor
+        this.backRight.power = backRight * factor
     }
 
 
@@ -120,12 +111,12 @@ class Drivetrain : Subsystem {
         val tolerance = .4
         var error = Double.MAX_VALUE
         turnController.reset()
-        while (opMode.opModeIsActive() && Math.abs(error) > tolerance) {
+        while (opMode.opModeIsActive() && abs(error) > tolerance) {
             update()
             currentAngle = Math.toDegrees(Robot.odometry.getHeading())
             error = getAngleDist(currentAngle, targetAngle)
             direction = getAngleDir(currentAngle, targetAngle)
-            turnRate = turnController.update(error.toDouble())
+            turnRate = turnController.update(error)
             turnRate = clip(turnRate, maxSpeed, minSpeed)
             opMode.telemetry.addData("error", error)
             opMode.telemetry.addData("turnRate", turnRate)
@@ -139,10 +130,10 @@ class Drivetrain : Subsystem {
 
     private fun getAngleDist(targetAngle: Double, currentAngle: Double): Double {
         var angleDifference = currentAngle - targetAngle
-        if (Math.abs(angleDifference) > 180) {
-            angleDifference = 360 - Math.abs(angleDifference)
+        angleDifference = if (abs(angleDifference) > 180) {
+            360 - abs(angleDifference)
         } else {
-            angleDifference = Math.abs(angleDifference)
+            abs(angleDifference)
         }
         return angleDifference
     }
@@ -150,8 +141,8 @@ class Drivetrain : Subsystem {
 
     private fun getAngleDir(targetAngle: Double, currentAngle: Double): Int {
         val angleDifference = targetAngle - currentAngle
-        var angleDir = (angleDifference / Math.abs(angleDifference)) as Int
-        if (Math.abs(angleDifference) > 180) {
+        var angleDir = (angleDifference / abs(angleDifference)).toInt()
+        if (abs(angleDifference) > 180) {
             angleDir *= -1
         }
         return angleDir
@@ -159,15 +150,20 @@ class Drivetrain : Subsystem {
 
 
     fun clip(`val`: Double, max: Double, min: Double): Double {
-        val sign: Int
-        sign = if (`val` < 0) -1 else 1
-        return if (abs(`val`) < min) min * sign else if (Math.abs(`val`) > max) max * sign else `val`
+        val sign: Int = if (`val` < 0) -1 else 1
+        return if (abs(`val`) < min) {
+            min * sign
+        } else if (abs(`val`) > max) {
+            max * sign
+        } else {
+            `val`
+        }
     }
 
     fun resetEncoders() {
         for (motor in motors) {
-            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER)
-            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER)
+            motor.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
+            motor.mode = DcMotor.RunMode.RUN_USING_ENCODER
         }
     }
 
@@ -183,6 +179,10 @@ class Drivetrain : Subsystem {
 
     fun moveToPosition(targetPos: Vector, heading: Double): Boolean {
         return moveToPosition(targetPos, heading, .5, .05, .3, 1.0, 1.5)
+    }
+
+    fun getMoveToPositionCommand(targetPos: Vector, heading: Double): Command {
+        return this.MoveToPositionCommand(targetPos, heading)
     }
 
     fun moveToPosition(
@@ -213,17 +213,15 @@ class Drivetrain : Subsystem {
         tolerance: Double,
         headingTolerance: Double
     ): Boolean {
-        update()
         currentPos = Robot.odometry.getPos()
         opMode.telemetry.addData("target", targetPos)
         opMode.telemetry.addData("current", currentPos)
-        val ydiff: Double = Math.abs(targetPos.getY() - currentPos!!.getY())
-        val xdiff: Double = Math.abs(targetPos.getX() - currentPos!!.getX())
         getMotorPowers(targetPos, heading)
-        var diag1: Double = power!!.getX()
-        var diag2: Double = power!!.getY()
+        var diag1: Double = power.getX()
+        var diag2: Double = power.getY()
+
         val headingDiff = getAngleDist(heading, Math.toDegrees(Robot.odometry.getHeading()))
-        val maxValue: Double = Math.max(diag1, diag2)
+        val maxValue: Double = diag1.coerceAtLeast(diag2)
         if (maxValue > maxSpeed) {
             diag1 = diag1 / maxValue * maxSpeed
             diag2 = diag2 / maxValue * maxSpeed
@@ -232,7 +230,7 @@ class Drivetrain : Subsystem {
         diag2 = clip(diag2, maxSpeed, minSpeed)
         opMode.telemetry.addData("raw angle power", anglePower)
         anglePower = clip(anglePower, maxAngleSpeed, 0.1)
-        if (Math.abs(headingDiff) <= headingTolerance) {
+        if (abs(headingDiff) <= headingTolerance) {
             anglePower = 0.0
         }
         opMode.telemetry.addData("mod angle power", anglePower)
@@ -241,24 +239,20 @@ class Drivetrain : Subsystem {
             Math.toDegrees(Robot.odometry.getHeading())
         ).toDouble()
         setMotorPowers(diag1, diag2, anglePower)
-        val error: Vector = Vector.sub(targetPos, currentPos!!)
+        val error: Vector = Vector.sub(targetPos, currentPos)
         val xDiff: Double = error.getX()
         val yDiff: Double = error.getY()
-        //        headingDiff = 0;
+//        headingDiff = 0;
 //        xDiff = 0;
 //        opMode.telemetry.addData("diag1", diag1);
 //        opMode.telemetry.addData("diag2", diag2);
+
         opMode.telemetry.addData("xdiff", xDiff)
-        item = if (item == null) {
-            opMode.telemetry.addData("ydiff", yDiff)
-        } else {
-            item!!.setRetained(false)
-            opMode.telemetry.addData("ydiff", yDiff)
-        }
-        item!!.setRetained(true)
+        opMode.telemetry.addData("ydiff", yDiff)
+
         opMode.telemetry.addData("angle diff", headingDiff)
         opMode.telemetry.update()
-        if (Math.abs(xDiff) < tolerance && Math.abs(yDiff) < tolerance && Math.abs(headingDiff) < headingTolerance || !opMode.opModeIsActive()) {
+        if (abs(xDiff) < tolerance && abs(yDiff) < tolerance && abs(headingDiff) < headingTolerance || !opMode.opModeIsActive()) {
             setMotorPowers(0.0, 0.0, 0.0)
             xController.reset()
             yController.reset()
@@ -268,8 +262,8 @@ class Drivetrain : Subsystem {
         return true
     }
 
-    fun getMotorPowers(targetPosition: Vector?, targetAngle: Double) {
-        val error: Vector = Vector.sub(targetPosition!!, currentPos!!)
+    fun getMotorPowers(targetPosition: Vector, targetAngle: Double) {
+        val error: Vector = Vector.sub(targetPosition, currentPos)
         opMode.telemetry.addData("field centric error", error)
         val heading: Double = Robot.odometry.getHeading()
         error.rotate(heading)
@@ -287,13 +281,11 @@ class Drivetrain : Subsystem {
                 Math.toDegrees(Robot.odometry.getHeading())
             )
         )
-        val leftx: Double = robotCentric!!.getX()
-        val lefty: Double = robotCentric!!.getY()
-        val scalar: Double = Math.max(
-            Math.abs(lefty - leftx),
-            Math.abs(lefty + leftx)
-        ) //scalar and magnitude scale the motor powers based on distance from joystick origin
-        val magnitude: Double = Math.sqrt(Math.pow(lefty, 2.0) + Math.pow(leftx, 2.0))
+        val leftx: Double = robotCentric.getX()
+        val lefty: Double = robotCentric.getY()
+        val scalar: Double = abs(lefty - leftx)
+            .coerceAtLeast(abs(lefty + leftx)) //scalar and magnitude scale the motor powers based on distance from joystick origin
+        val magnitude: Double = sqrt(lefty.pow(2.0) + leftx.pow(2.0))
         power = Vector((lefty + leftx) * magnitude / scalar, (lefty - leftx) * magnitude / scalar)
         //
         opMode.telemetry.addData("x power", leftx)
@@ -306,8 +298,8 @@ class Drivetrain : Subsystem {
     // double frontRight,
     // double backLeft,
     // double backRight
-    fun findMotorPowers(leftX: Double, leftY: Double, rightX: Double): DoubleArray? {
-        val magnitude: Double = Math.sqrt(leftX * leftX + leftY * leftY + rightX * rightX)
+    fun findMotorPowers(leftX: Double, leftY: Double, rightX: Double): DoubleArray {
+        val magnitude: Double = sqrt(leftX * leftX + leftY * leftY + rightX * rightX)
         val powers = DoubleArray(4)
         if (magnitude > 1) {
             powers[0] = (leftX + leftY - rightX) / magnitude
@@ -324,25 +316,29 @@ class Drivetrain : Subsystem {
     }
 
     fun setMotorPowers(diag1: Double, diag2: Double, rotate: Double) {
-        var upleft: Double
-        var upright: Double
-        var downleft: Double
-        var downright: Double
-        upleft = diag1 + rotate
-        downleft = diag2 + rotate
-        upright = diag2 - rotate
-        downright = diag1 - rotate
+        var upleft: Double = diag1 + rotate
+        var downleft: Double = diag2 + rotate
+        var upright: Double = diag2 - rotate
+        var downright: Double = diag1 - rotate
         val max: Double =
-            Math.abs(Math.max(Math.max(Math.max(upleft, upright), downleft), downright))
+            abs(upleft.coerceAtLeast(upright).coerceAtLeast(downleft).coerceAtLeast(downright))
         if (max > 1) {
             upleft /= max
             upright /= max
             downleft /= max
             downright /= max
         }
-        frontLeft.setPower(upleft)
-        frontRight.setPower(upright)
-        backLeft.setPower(downleft)
-        backRight.setPower(downright)
+        frontLeft.power = upleft
+        frontRight.power = upright
+        backLeft.power = downleft
+        backRight.power = downright
+    }
+
+    inner class MoveToPositionCommand(private var targetPos: Vector, private var heading: Double) : Command {
+        override var isFinished: Boolean = false
+
+        override fun update() {
+            isFinished = Drivetrain().moveToPosition(targetPos, heading)
+        }
     }
 }

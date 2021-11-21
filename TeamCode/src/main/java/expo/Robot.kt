@@ -13,8 +13,10 @@ object Robot {
     val odoLifter = OdometryLifter()
     val odometry = Odometry()
     val outtake = Outtake()
+    val motorTester = MotorTester()
 
     private val subsystems = listOf(intake, drivetrain, touchSensor, odoLifter, odometry, outtake, IMU)
+
 
     fun initialize(opMode: LinearOpMode) {
         for (subsystem: Subsystem in subsystems)

@@ -6,21 +6,64 @@ import com.qualcomm.robotcore.hardware.Servo
 import expo.Subsystem
 
 class Intake : Subsystem {
-    lateinit var intakeServo: Servo
-    lateinit var intakeMotor: DcMotor
+    //TODO: getCommand()
+    private lateinit var mainMotor: DcMotor
+    private lateinit var pusherMotor: DcMotor
+    private lateinit var doorServo: Servo
+
+    //test and adjust these as necessary
+    private var mainMotorSpeed: Double = 0.05
+    private var doorOpenPosition: Double = 0.5
+    private var mainMovementDuration: Long = 250
+    private var pause: Long = 500
+
     override fun initialize(opMode: LinearOpMode) {
-        intakeServo = opMode.hardwareMap.servo.get("intake servo")
-        intakeMotor = opMode.hardwareMap.dcMotor.get("intake motor")
-        intakeMotor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
-        intakeServo.direction = Servo.Direction.REVERSE
-        intakeServo.scaleRange(.55, 1.0)
+        mainMotor = opMode.hardwareMap.dcMotor.get("intakeMainMotor")
+        pusherMotor = opMode.hardwareMap.dcMotor.get("intakePusherMotor")
+        doorServo = opMode.hardwareMap.servo.get("intakeDoorServo")
+
+        mainMotor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+        pusherMotor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
     }
 
-    fun setIntakePower(power: Double) {
-        intakeMotor.power = power
+    //make this a command cus thread.sleep() is a bad idea
+    public fun intake() {
+        togglePusher()
+        Thread.sleep(pause)
+        raiseIntake() //down by default
+        Thread.sleep(pause)
+        toggleDoor() //closed by default
+        Thread.sleep(pause)
+        lowerIntake()
+        Thread.sleep(pause)
+        togglePusher()
+        Thread.sleep(pause)
+        toggleDoor()
     }
 
-    fun setIntakePosition(position: Double) {
-        intakeServo.position = position
+    private fun togglePusher() {
+        //change > to < if power should be negative
+        pusherMotor.power = if (pusherMotor.power > 0) 0.0 else 0.1
+    }
+
+    private fun raiseIntake() {
+        mainMotor.power = mainMotorSpeed
+        Thread.sleep(mainMovementDuration)
+        mainMotor.power = 0.0
+    }
+
+    private fun toggleDoor() {
+        doorServo.position = if (doorServo.position > 0) 0.0 else doorOpenPosition
+    }
+
+    private fun lowerIntake() {
+        //opposite of raiseIntake
+        mainMotor.power = -mainMotorSpeed
+        Thread.sleep(mainMovementDuration)
+        mainMotor.power = 0.0
+    }
+
+    fun getCommand() {
+
     }
 }
