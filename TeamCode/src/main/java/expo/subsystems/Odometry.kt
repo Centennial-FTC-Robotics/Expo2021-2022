@@ -37,6 +37,7 @@ class Odometry : Subsystem {
 
 
     private lateinit var opMode: LinearOpMode
+
     override fun initialize(opMode: LinearOpMode) {
         back = opMode.hardwareMap.dcMotor["back"]
         middle = opMode.hardwareMap.dcMotor["middle"]
