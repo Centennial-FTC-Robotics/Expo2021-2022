@@ -81,7 +81,7 @@ class Drivetrain : Subsystem {
         frontRight: Double,
         backLeft: Double,
         backRight: Double,
-        factor: Float
+        factor: Double
     ) {
         this.frontLeft.power = frontLeft * factor
         this.frontRight.power = frontRight * factor
