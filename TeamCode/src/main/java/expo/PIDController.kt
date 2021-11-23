@@ -21,6 +21,18 @@ class PIDController(private var kP: Double, private var kI: Double, private var 
         this.kD = kD
     }
 
+    fun getPID(): Triple<Double, Double, Double> {
+        return Triple(kP, kI, kD)
+    }
+
+    fun increase(index: Int, amount: Double) {
+        when (index) {
+            0 -> kP += amount
+            1 -> kI += amount
+            2 -> kD += amount
+        }
+    }
+
     fun update(error: Double): Double {
         val dt = time.milliseconds()
         time.reset()
