@@ -8,6 +8,11 @@ class PIDController(private var kP: Double, private var kI: Double, private var 
     private var lastError: Double = 0.0
     private var integral: Double = 0.0
     private var time: ElapsedTime = ElapsedTime()
+    private var maxIntegral: Double = 0.0
+
+    init {
+        findMaxIntegral()
+    }
 
     fun reset() {
         time.reset()
@@ -19,6 +24,7 @@ class PIDController(private var kP: Double, private var kI: Double, private var 
         this.kP = kP
         this.kI = kI
         this.kD = kD
+        findMaxIntegral()
     }
 
     fun getPID(): Triple<Double, Double, Double> {
@@ -31,6 +37,14 @@ class PIDController(private var kP: Double, private var kI: Double, private var 
             1 -> kI += amount
             2 -> kD += amount
         }
+        findMaxIntegral()
+    }
+
+    private fun findMaxIntegral() {
+        //a good value for this is where the max value of the integral term * kI is .25
+        //so maxIntegral * kI = .25
+        //https://www.ctrlaltftc.com/practical-improvements-to-pid#integral-windup-and-mitigation-methods
+        maxIntegral = .25 / kI
     }
 
     fun update(error: Double): Double {
@@ -41,9 +55,10 @@ class PIDController(private var kP: Double, private var kI: Double, private var 
         lastError = error
 
         //antiwindup
-        if (abs(integral) > 1.0) {
-            integral = 0.0
+        if (abs(integral) > maxIntegral) {
+            integral = maxIntegral * if (integral > 0) 1 else -1
         }
+
 
         return kP * error + kI * integral + kD * derivative
     }
