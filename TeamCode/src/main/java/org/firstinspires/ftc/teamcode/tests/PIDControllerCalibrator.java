@@ -23,6 +23,8 @@ public class PIDControllerCalibrator extends ExpoOpMode {
 	@Override
 	public void runOpMode () {
 		PIDControllers controllers = PIDControllers.X;
+//		You can change the I limit per controller:
+//		PIDControllers.X.controller.setILimit();
 		PIDController controller = controllers.getController();
 		
 		int pidIndex = 0;
@@ -97,6 +99,7 @@ public class PIDControllerCalibrator extends ExpoOpMode {
 		telemetry.addLine();
 		telemetry.addData("kP", controller.getPID().getFirst());
 		telemetry.addData("kI", controller.getPID().getSecond());
+		telemetry.addData("Current I Limit: ", controller.getILimit());
 		telemetry.addData("kD", controller.getPID().getThird());
 		telemetry.update();
 	}

@@ -37,7 +37,7 @@ class PIDController(private var kP: Double, private var kI: Double, private var 
             1 -> kI += amount
             2 -> kD += amount
         }
-        findMaxIntegral()
+//        findMaxIntegral()
     }
 
     private fun findMaxIntegral() {
@@ -45,6 +45,14 @@ class PIDController(private var kP: Double, private var kI: Double, private var 
         //so maxIntegral * kI = .25
         //https://www.ctrlaltftc.com/practical-improvements-to-pid#integral-windup-and-mitigation-methods
         maxIntegral = .25 / kI
+    }
+
+    fun getILimit(): Double {
+        return maxIntegral
+    }
+
+    fun setILimit(value: Double) {
+        maxIntegral = value
     }
 
     fun update(error: Double): Double {
