@@ -4,7 +4,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.DcMotor
 import expo.Robot
 import expo.Subsystem
-import expo.command.CommandScheduler
 import expo.util.Vector
 import kotlin.math.cos
 import kotlin.math.sin
