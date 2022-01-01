@@ -1,4 +1,4 @@
-package expo.commands
+package expo.command
 
 import expo.Subsystem
 import java.util.HashSet
@@ -8,7 +8,7 @@ import java.util.HashSet
  * It will only count as finished when all commands are finished.
  * The counterpart to this is [SequentialCommandGroup], which runs in sequence.
  */
-class ParallelCommandGroup(vararg commands: Command) : CommandGroup {
+class   ParallelCommandGroup(vararg commands: Command) : CommandGroup {
     private val commands: MutableSet<Command> = HashSet()
     private val requirements: MutableSet<Subsystem> = HashSet()
     override var isCancelable = true

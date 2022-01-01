@@ -1,4 +1,4 @@
-package expo.commands
+package expo.command
 
 import expo.Subsystem
 import java.util.*
@@ -12,8 +12,9 @@ class SequentialCommandGroup(vararg commands: Command) : CommandGroup {
     //for anyone who doesnt know what a Queue is, essentially a list but you can only access the front
     //so when you add stuff to it, it adds to the end of the list, and you can get/remove the object in the front
     //so it works in FIFO (First In First Out) order
-    private val commands: Queue<Command> = LinkedList()
+    private val commands: MutableList<Command> = LinkedList()
     private val requirements: MutableSet<Subsystem> = HashSet()
+    private var index = 0
     override var isCancelable = true
     private var running = false
 
@@ -31,26 +32,27 @@ class SequentialCommandGroup(vararg commands: Command) : CommandGroup {
     }
 
     override fun init() {
+        index = 0
         //only initialize the first command, the others are initialized in the update method once the previous one is finished
-        if (!commands.isEmpty()) {
-            val currentCommand = commands.element()
+        if (commands.isNotEmpty()) {
+            val currentCommand = commands[index]
             currentCommand.init()
         }
     }
 
     override fun update() {
         if (!running) running = true
-        if (!commands.isEmpty()) {
-            var currentCommand = commands.element()
+        if (index < commands.size) {
+            var currentCommand = commands[index]
             if (currentCommand.isFinished) {
-                commands.remove()
+                index++
                 currentCommand.done()
-                if (!commands.isEmpty()) {
-                    currentCommand = commands.element()
+                if (index < commands.size) {
+                    currentCommand = commands[index]
                     currentCommand.init()
                 }
             }
-            if (!commands.isEmpty()) {
+            if (index < commands.size) {
                 currentCommand.update()
             }
 
@@ -59,7 +61,7 @@ class SequentialCommandGroup(vararg commands: Command) : CommandGroup {
     }
 
     override val isFinished: Boolean
-        get() = commands.isEmpty()
+        get() = index >= commands.size
 
     override fun cancel() {
         for (command in commands) {
