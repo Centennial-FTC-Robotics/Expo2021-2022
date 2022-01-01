@@ -1,4 +1,4 @@
-package expo.util
+package expo.gamepad
 
 import android.graphics.Color
 import com.qualcomm.ftccommon.SoundPlayer
@@ -6,7 +6,7 @@ import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.Blinker
 import expo.Robot
-import expo.gamepad.ExpoGamepad
+import expo.util.ExpoGamepad
 import java.util.concurrent.TimeUnit
 
 abstract class ExpoOpMode(var team: Team) : LinearOpMode() {
