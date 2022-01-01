@@ -1,8 +1,8 @@
-package expo.util
+package expo.gamepad
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.Gamepad
-import java.util.*
+import expo.util.Vector
 import kotlin.collections.HashMap
 
 class ExpoGamepad(private val gamepad: Gamepad) {
@@ -75,7 +75,7 @@ class ExpoGamepad(private val gamepad: Gamepad) {
 
     fun getControllerVector(angle: Double): Vector {
         val controlVector = Vector(getLeftX(), getLeftY())
-        controlVector.rotate(angle)
+        controlVector.rotate(-angle)
         return controlVector
     }
 
