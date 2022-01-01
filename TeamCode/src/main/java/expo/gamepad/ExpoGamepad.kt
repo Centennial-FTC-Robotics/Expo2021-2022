@@ -2,6 +2,7 @@ package expo.util
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.Gamepad
+import expo.util.Vector
 import java.util.*
 import kotlin.collections.HashMap
 
