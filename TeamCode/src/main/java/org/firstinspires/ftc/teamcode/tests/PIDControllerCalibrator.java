@@ -3,7 +3,11 @@ package org.firstinspires.ftc.teamcode.tests;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import expo.PIDController;
 import expo.Robot;
-import expo.util.Button;
+import expo.command.CommandScheduler;
+import expo.command.commands.MoveToPositionCommand;
+import expo.logger.Item;
+import expo.logger.Logger;
+import expo.gamepad.Button;
 import expo.util.ExpoOpMode;
 import expo.util.Vector;
 
@@ -19,7 +23,7 @@ import expo.util.Vector;
 @TeleOp(name = "PID Controller Calibrator", group = "Calibrator")
 public class PIDControllerCalibrator extends ExpoOpMode {
 	private static final char[] VALUES = {'P', 'I', 'D'};
-	
+	private static final double DISTANCE = 24 * 2;
 	@Override
 	public void runOpMode () {
 		PIDControllers controllers = PIDControllers.X;
@@ -28,19 +32,46 @@ public class PIDControllerCalibrator extends ExpoOpMode {
 		int pidIndex = 0;
 		boolean atStart = true;
 		
+		MoveToPositionCommand command = null;
+		
 		super.runOpMode();
+		
+		Robot.INSTANCE.getOdometry().setStartPos(0, 0, 0);
+		Robot.INSTANCE.getIMU().setStartAngle(0);
 		controller1.registerPressedButton(Button.X);
 		controller1.registerPressedButton(Button.A);
 		controller1.registerPressedButton(Button.B);
 		controller1.registerPressedButton(Button.UP);
 		controller1.registerPressedButton(Button.DOWN);
+		controller1.registerPressedButton(Button.START);
 		
 		while (opModeIsActive()) {
+			Logger.getInstance().addItem(new Item("Current Controller", controllers.name()));
+			Logger.getInstance().addItem(new Item("Current Coefficient", VALUES[pidIndex]));
+			Logger.getInstance().addItem(new Item("kP", controller.getPID().getFirst()));
+			Logger.getInstance().addItem(new Item("kI", controller.getPID().getSecond()));
+			Logger.getInstance().addItem(new Item("kD", controller.getPID().getThird()));
+			Logger.getInstance().addItem(new Item("Current Position", Robot.INSTANCE.getOdometry().getPos()));
+			Logger.getInstance().addItem(new Item("Heading", Math.toDegrees(Robot.INSTANCE.getOdometry().getHeading())));
+			
+			Robot.INSTANCE.update();
+			
+			if(controller1.getPressedButton(Button.START) && command == null && atStart) {
+				Robot.INSTANCE.getOdometry().setStartPos(0, 0, 0);
+				Robot.INSTANCE.getIMU().setStartAngle(0);
+			}
+			
 			if (controller1.getPressedButton(Button.UP)) {
-				controller.increase(pidIndex, 0.01);
+				double amount = 0.001;
+				if (controller1.getButton(Button.LEFT_BUMPER))
+					amount = .0001;
+				controller.increase(pidIndex, amount);
 			}
 			if (controller1.getPressedButton(Button.DOWN)) {
-				controller.increase(pidIndex, -0.01);
+ 				double amount = 0.001;
+				if (controller1.getButton(Button.LEFT_BUMPER))
+					amount = .0001;
+				controller.increase(pidIndex, -amount);
 			}
 			
 			if (controller1.getPressedButton(Button.X)) {
@@ -58,53 +89,40 @@ public class PIDControllerCalibrator extends ExpoOpMode {
 				controller = controllers.getController();
 			}
 			
-			if (controller1.getPressedButton(Button.A)) {
+			if (command != null && command.isFinished()) {
+				command = null;
+			}
+			
+			if (command != null && controller1.getButton(Button.BACK)) {
+				CommandScheduler.Companion.getInstance().forceInterrupt(command);
+				command = null;
+			}
+			
+			if (controller1.getPressedButton(Button.A) && command == null) {
 				if (atStart) {
 					if (controller1.getButton(Button.Y)) {
-						while (opModeIsActive()
-								  && !controller1.getButton(Button.BACK)
-								  && Robot.INSTANCE.getDrivetrain().moveToPosition(new Vector(48, 48), Math.toDegrees(Robot.INSTANCE.getOdometry().getHeading() + 90), PIDControllers.X.controller, PIDControllers.Y.controller, PIDControllers.ANGLE.controller))
-							;
+						command = new MoveToPositionCommand(new Vector(DISTANCE, DISTANCE), 90, PIDControllers.X.controller, PIDControllers.Y.controller, PIDControllers.ANGLE.controller);
 					} else if (controllers == PIDControllers.X) {
-						while (opModeIsActive()
-								  && !controller1.getButton(Button.BACK)
-								  && Robot.INSTANCE.getDrivetrain().moveToPosition(new Vector(48, 0), 0, PIDControllers.X.controller, PIDControllers.Y.controller, PIDControllers.ANGLE.controller))
-							;
+						command = new MoveToPositionCommand(new Vector(DISTANCE, 0), 0, PIDControllers.X.controller, PIDControllers.Y.controller, PIDControllers.ANGLE.controller);
 					} else if (controllers == PIDControllers.Y) {
-						while (opModeIsActive()
-								  && !controller1.getButton(Button.BACK)
-								  && Robot.INSTANCE.getDrivetrain().moveToPosition(new Vector(0, 48), 0, PIDControllers.X.controller, PIDControllers.Y.controller, PIDControllers.ANGLE.controller))
-							;
+						command = new MoveToPositionCommand(new Vector(0, DISTANCE), 0, PIDControllers.X.controller, PIDControllers.Y.controller, PIDControllers.ANGLE.controller);
 					} else {
-						while (opModeIsActive()
-								  && !controller1.getButton(Button.BACK)
-								  && Robot.INSTANCE.getDrivetrain().moveToPosition(new Vector(0, 0), Math.toDegrees(Robot.INSTANCE.getOdometry().getHeading() + 180), PIDControllers.X.controller, PIDControllers.Y.controller, PIDControllers.ANGLE.controller))
-							;
+						command = new MoveToPositionCommand(new Vector(0, 0), 90, PIDControllers.X.controller, PIDControllers.Y.controller, PIDControllers.ANGLE.controller);
 					}
 				} else {
-					while (opModeIsActive()
-							  && !controller1.getButton(Button.BACK)
-							  && Robot.INSTANCE.getDrivetrain().moveToPosition(new Vector(0, 0), 0, PIDControllers.X.controller, PIDControllers.Y.controller, PIDControllers.ANGLE.controller))
-						;
+					command = new MoveToPositionCommand(new Vector(0, 0), 0, PIDControllers.X.controller, PIDControllers.Y.controller, PIDControllers.ANGLE.controller);
 				}
-				Robot.INSTANCE.getDrivetrain().setPowers(0, 0, 0, 0);
+				command.schedule();
 				atStart = !atStart;
 			}
+			
 		}
-		
-		telemetry.addData("Current Controller", controllers.name());
-		telemetry.addData("Current Coefficient", VALUES[pidIndex]);
-		telemetry.addLine();
-		telemetry.addData("kP", controller.getPID().getFirst());
-		telemetry.addData("kI", controller.getPID().getSecond());
-		telemetry.addData("kD", controller.getPID().getThird());
-		telemetry.update();
 	}
 	
 	private enum PIDControllers {
-		X(new PIDController(0.001, 0.0, 0.0)),
-		Y(new PIDController(0.001, 0.0, 0.0)),
-		ANGLE(new PIDController(0.001, 0.0, 0.0));
+		X(new PIDController(.0186, 2.0E-4, .003)),
+		Y(new PIDController(.0186, 2.0E-4, .003)),
+		ANGLE(new PIDController(.002222, 0.001, 0));
 		
 		private PIDController controller;
 		

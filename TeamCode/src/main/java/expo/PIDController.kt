@@ -52,14 +52,21 @@ class PIDController(private var kP: Double, private var kI: Double, private var 
         time.reset()
         integral += error * dt
         val derivative = (error - lastError) / dt
-        lastError = error
 
         //antiwindup
+        if (error > 0 && lastError < 0) {
+            integral = 0.0
+        } else if (error < 0 && lastError > 0) {
+            integral = 0.0
+        }
+
         if (abs(integral) > maxIntegral) {
             integral = maxIntegral * if (integral > 0) 1 else -1
         }
 
 
+
+        lastError = error
         return kP * error + kI * integral + kD * derivative
     }
 }

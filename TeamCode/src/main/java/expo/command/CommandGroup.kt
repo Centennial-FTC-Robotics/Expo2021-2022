@@ -1,4 +1,4 @@
-package expo.commands
+package expo.command
 
 interface CommandGroup : Command {
     /**
