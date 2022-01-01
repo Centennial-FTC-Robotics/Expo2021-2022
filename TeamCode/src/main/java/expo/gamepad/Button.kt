@@ -1,4 +1,4 @@
-package expo.util
+package expo.gamepad
 
 enum class Button {
     A,
