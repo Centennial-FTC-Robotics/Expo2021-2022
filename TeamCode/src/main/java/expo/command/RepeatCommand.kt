@@ -1,20 +1,20 @@
-package expo.commands
+package expo.command
 
 import expo.Subsystem
 
 class RepeatCommand(private val command: Command, private val runs: Int) : Command {
     private var run = 0
 
+    init {
+        CommandScheduler.instance.schedule(command)
+    }
+
     override fun update() {
         if (command.isFinished) {
             run++
-            command.done()
             if (!isFinished) {
-                command.init()
-                command.update()
+                CommandScheduler.instance.scheduleLate(command)
             }
-        } else {
-            command.update()
         }
     }
 

@@ -1,4 +1,4 @@
-package expo.commands
+package expo.command
 
 import expo.Subsystem
 
@@ -28,7 +28,7 @@ interface Command {
      * Will be called if isCancelable() returns true
      */
     fun cancel() {
-        //Do nothing by default
+        done()
     }
 
     /**

@@ -173,12 +173,23 @@ class Drivetrain : Subsystem {
         }
     }
 
-    fun loopMoveToPos(target: Vector, heading: Double) {
-        while (opMode.opModeIsActive() && moveToPosition(target, heading));
+
+    fun loopMoveToPos(
+        target: Vector, heading: Double,
+        x: PIDController = xController,
+        y: PIDController = yController,
+        angle: PIDController = angleController
+    ) {
+        while (opMode.opModeIsActive() && moveToPosition(target, heading, x, y, angle));
     }
 
-    fun moveToPosition(targetPos: Vector, heading: Double): Boolean {
-        return moveToPosition(targetPos, heading, .5, .05, .3, 1.0, 1.5)
+    fun moveToPosition(
+        targetPos: Vector, heading: Double,
+        x: PIDController = xController,
+        y: PIDController = yController,
+        angle: PIDController = angleController
+    ): Boolean {
+        return moveToPosition(targetPos, heading, .5, .05, .3, 1.0, 1.5, x, y, angle)
     }
 
     fun getMoveToPositionCommand(targetPos: Vector, heading: Double): Command {
@@ -211,12 +222,15 @@ class Drivetrain : Subsystem {
         minSpeed: Double,
         maxAngleSpeed: Double,
         tolerance: Double,
-        headingTolerance: Double
+        headingTolerance: Double,
+        x: PIDController = xController,
+        y: PIDController = yController,
+        angle: PIDController = angleController
     ): Boolean {
         currentPos = Robot.odometry.getPos()
         opMode.telemetry.addData("target", targetPos)
         opMode.telemetry.addData("current", currentPos)
-        getMotorPowers(targetPos, heading)
+        getMotorPowers(targetPos, heading, x, y, angle)
         var diag1: Double = power.getX()
         var diag2: Double = power.getY()
 
@@ -262,7 +276,13 @@ class Drivetrain : Subsystem {
         return true
     }
 
-    fun getMotorPowers(targetPosition: Vector, targetAngle: Double) {
+    fun getMotorPowers(
+        targetPosition: Vector,
+        targetAngle: Double,
+        x: PIDController = xController,
+        y: PIDController = yController,
+        angle: PIDController = angleController
+    ) {
         val error: Vector = Vector.sub(targetPosition, currentPos)
         opMode.telemetry.addData("field centric error", error)
         val heading: Double = Robot.odometry.getHeading()
@@ -271,11 +291,11 @@ class Drivetrain : Subsystem {
         opMode.telemetry.addData("current angle", Math.toDegrees(Robot.odometry.getHeading()))
         opMode.telemetry.addData("target angle", targetAngle)
         robotCentric = Vector(
-            -xController.update(error.getX()),
-            yController.update(error.getY())
+            -x.update(error.getX()),
+            y.update(error.getY())
         )
         opMode.telemetry.addData("robot centric powers", robotCentric)
-        anglePower = angleController.update(
+        anglePower = angle.update(
             getAngleDist(
                 targetAngle,
                 Math.toDegrees(Robot.odometry.getHeading())
