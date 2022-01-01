@@ -4,6 +4,8 @@ import com.qualcomm.hardware.bosch.BNO055IMU
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import expo.Subsystem
+import expo.logger.Item
+import expo.logger.Logger
 
 class IMU : Subsystem {
     private var angle = 0.0
@@ -22,8 +24,7 @@ class IMU : Subsystem {
 
         while (!opMode.isStopRequested && !imu.isGyroCalibrated);
 
-        opMode.telemetry.addLine("imu inited")
-        opMode.telemetry.update()
+        Logger.getInstance().addLine(Item.Line("imu inited"))
     }
 
     fun setStartAngle(startAngle: Double) {
