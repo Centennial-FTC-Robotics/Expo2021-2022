@@ -7,7 +7,7 @@ import expo.Subsystem
 class CarouselSpinner : Subsystem {
     private lateinit var carousel: DcMotor
     override fun initialize(opMode: LinearOpMode) {
-        carousel = opMode.hardwareMap.dcMotor.get("carouselMotor")
+        carousel = opMode.hardwareMap.dcMotor.get("carousel")
 
     }
 
