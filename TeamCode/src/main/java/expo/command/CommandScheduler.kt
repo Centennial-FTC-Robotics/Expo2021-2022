@@ -1,15 +1,14 @@
-package expo.commands
+package expo.command
 
 import expo.Subsystem
 import java.util.*
-import kotlin.collections.HashMap
-import kotlin.collections.HashSet
-import kotlin.jvm.JvmOverloads
 
 class CommandScheduler {
     private val subsystemsInUse: MutableMap<Subsystem, Command> = HashMap()
     private val scheduledCommands: MutableSet<Command> = HashSet()
+    private val commandsRegisteredLate: MutableSet<Command> = HashSet()
     private val registeredSubsystems: MutableSet<Subsystem> = HashSet()
+
 
     /**
      * Runs update on all of the commands that are scheduled.
@@ -37,6 +36,12 @@ class CommandScheduler {
         for (scheduledCommand in scheduledCommands) {
             scheduledCommand.update()
         }
+
+        for (command in commandsRegisteredLate) {
+            schedule(command)
+        }
+
+        commandsRegisteredLate.clear()
     }
 
     /**
@@ -76,6 +81,10 @@ class CommandScheduler {
         scheduledCommands.add(command)
     }
 
+    fun scheduleLate(command: Command) {
+        commandsRegisteredLate.add(command)
+    }
+
     /**
      * Schedules a list of commands. If one or more of the commands cannot be scheduled, the others are still scheduled.
      * If the commands rely on each other to all be scheduled, do not use this. Use a command group instead.
@@ -105,6 +114,8 @@ class CommandScheduler {
      */
     fun forceInterrupt(command: Command) {
         command.cancel()
+        scheduledCommands.remove(command)
+        subsystemsInUse.keys.removeAll(command.requiredSubsystems())
     }
 
     /**
@@ -127,8 +138,17 @@ class CommandScheduler {
         return false
     }
 
+    fun isRunning(): Boolean {
+        return scheduledCommands.isNotEmpty()
+    }
+
     companion object {
         var instance: CommandScheduler = CommandScheduler()
             private set
+
+        fun reset() {
+            instance = CommandScheduler()
+        }
     }
+
 }
