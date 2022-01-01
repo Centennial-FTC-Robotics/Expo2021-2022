@@ -1,7 +1,5 @@
 package expo.gamepad
 
-import expo.util.ExpoGamepad
-
 /**
  * This class is used to track the state of a button.
  * A buttons state is only true if it was false before and is now true.

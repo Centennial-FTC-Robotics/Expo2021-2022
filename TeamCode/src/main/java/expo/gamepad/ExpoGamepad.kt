@@ -1,4 +1,4 @@
-package expo.command
+package expo.gamepad
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.Gamepad
