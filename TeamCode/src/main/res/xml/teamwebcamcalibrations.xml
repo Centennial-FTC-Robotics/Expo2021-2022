@@ -147,25 +147,25 @@
     <!-- ======================================================================================= -->
 
     <!-- Logitech HD Webcam C270, Calibrated by Noah Andrews, 2019.03.13 using 3DF Zephyr -->
-    <!--<Camera vid="Logitech" pid="0x0825">
+    <Camera vid="Logitech" pid="0x0825">
         <Calibration
             size="640 480"
             focalLength="822.317f, 822.317f"
             principalPoint="319.495f, 242.502f"
             distortionCoefficients="-0.0449369, 1.17277, 0, 0, -3.63244, 0, 0, 0"
             />
-    </Camera> -->
+    </Camera>
 
     <!-- ======================================================================================= -->
 
-    <!-- Unzano HD800H -->
-    <Camera vid = "Microdia" pid = "0x6366">
-        <Calibration
-            size="1920 1080"
-            focalLength="3196.26f, 3196.26f"
-            principalPoint="673.687f, 573.228f"
-            distortionCoefficients="-0.602068, -1.47718, 0, 0, 3.11138, 0, 0, 0"
-            />
-    </Camera>
+<!--    &lt;!&ndash; Unzano HD800H &ndash;&gt;-->
+<!--    <Camera vid = "Microdia" pid = "0x6366">-->
+<!--        <Calibration-->
+<!--            size="1920 1080"-->
+<!--            focalLength="3196.26f, 3196.26f"-->
+<!--            principalPoint="673.687f, 573.228f"-->
+<!--            distortionCoefficients="-0.602068, -1.47718, 0, 0, 3.11138, 0, 0, 0"-->
+<!--            />-->
+<!--    </Camera>-->
 
 </Calibrations>

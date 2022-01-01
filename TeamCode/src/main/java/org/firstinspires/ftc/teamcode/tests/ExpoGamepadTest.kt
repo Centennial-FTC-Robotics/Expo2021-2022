@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.tests
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.Gamepad
-import expo.util.Button
+import expo.gamepad.Button
 import expo.util.ExpoOpMode
 
 @TeleOp
