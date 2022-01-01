@@ -4,7 +4,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.DcMotor
 import expo.Robot
 import expo.Subsystem
-import expo.command.CommandScheduler
 import expo.util.Vector
 import kotlin.math.cos
 import kotlin.math.sin
@@ -20,6 +19,9 @@ class Odometry : Subsystem {
     private var backRadius = 7.9
     private var middleRadius = 4.528
 
+//    private var backRadius = 13.572254335260116
+//    private var middleRadius = 0.3709865532
+
     private var oldBack = 0
     private var oldMiddle = 0
     private var oldTheta = 0.0
@@ -34,7 +36,9 @@ class Odometry : Subsystem {
 
     private var angleCorrection = 0.0
 
-    private val ENCODER_COUNTS_PER_INCH = 8192.0 / (2 * Math.PI * 1.0)
+    companion object {
+        val ENCODER_COUNTS_PER_INCH = 8192.0 / (2 * Math.PI * 1.0)
+    }
 
 
     private lateinit var opMode: LinearOpMode
@@ -55,6 +59,11 @@ class Odometry : Subsystem {
     }
 
     fun setStartPos(x: Double, y: Double, theta: Double) {
+        back.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
+        middle.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
+        back.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
+        middle.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
+
         this.x = x
         this.y = y
         this.theta = theta
@@ -72,7 +81,7 @@ class Odometry : Subsystem {
 
         val deltaBack = ((back.currentPosition * backDir) - oldBack).toDouble()
         val deltaMiddle = ((middle.currentPosition * midDir) - oldMiddle).toDouble()
-        val deltaTheta = currentTheta - oldTheta
+        var deltaTheta = currentTheta - oldTheta
 
         oldBack = back.currentPosition * backDir
         oldMiddle = middle.currentPosition * midDir
@@ -82,22 +91,22 @@ class Odometry : Subsystem {
 
         var deltaX: Double
         var deltaY: Double
-
         if (deltaTheta == 0.0) {
             deltaX = deltaBack
             deltaY = deltaMiddle
         } else {
-            val strafeRadius = (deltaBack / deltaTheta) - backRadius
-            val turnRadius = (deltaMiddle / deltaTheta) - middleRadius
+            //if theres a programming god, i implore you to let this work
+            val strafeRadius = ((deltaBack) / deltaTheta) - backRadius
+            val turnRadius = ((deltaMiddle) / deltaTheta)
 
             deltaX = turnRadius * (cos(deltaTheta) - 1) + strafeRadius * sin(deltaTheta)
             deltaY = turnRadius * sin(deltaTheta) + strafeRadius * (1 - cos(deltaTheta))
         }
 
         val fieldCentric = Vector(deltaX / ENCODER_COUNTS_PER_INCH, deltaY / ENCODER_COUNTS_PER_INCH)
-        fieldCentric.rotate(theta)
+        fieldCentric.rotate(-theta)
 
-        x += fieldCentric.getX()
+        x += -fieldCentric.getX()
         y += fieldCentric.getY()
     }
 

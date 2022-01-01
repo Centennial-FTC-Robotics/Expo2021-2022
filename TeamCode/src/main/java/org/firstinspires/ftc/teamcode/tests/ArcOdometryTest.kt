@@ -1,19 +1,19 @@
 package org.firstinspires.ftc.teamcode.tests
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
+import expo.Robot
 import expo.util.ExpoOpMode
-import expo.util.Vector
 
 @TeleOp(name = "Arc Odometry Tester", group = "Tests")
 class ArcOdometryTest : ExpoOpMode() {
     override fun runOpMode() {
         super.runOpMode()
+        robot.IMU.setStartAngle(0.0)
+        robot.odometry.setStartPos(0.0, 0.0, 0.0)
         var pos: Pair<Double, Double>
         var encoders: Pair<Int, Int>
-        var control: Vector
         while (opModeIsActive()) {
-            updateGamepads()
-            robot.drivetrain.updateArcPos()
+            Robot.update()
             pos = robot.odometry.getPairPos()
             encoders = robot.odometry.getEncoders()
             telemetry.addData("X", pos.first)
@@ -23,14 +23,15 @@ class ArcOdometryTest : ExpoOpMode() {
             telemetry.addData("Middle Encoder", encoders.first)
             telemetry.addData("Back Encoder", encoders.second)
 
-            val powers =
-                robot.drivetrain.findMotorPowers(
-                    controller1.getLeftX(),
-                    controller1.getLeftY(),
-                    controller1.getRightX()
-                )
-            robot.drivetrain.setPowers(powers!![0], powers[1], powers[2], powers[3], .4)
-
+            val controlVector = controller1.getControllerVector()
+            telemetry.addData("Left Stick X", controlVector.getX())
+            telemetry.addData("Left Stick Y", controlVector.getY())
+            robot.drivetrain.findAndSetMotorPowers(
+                controlVector.getX(),
+                controlVector.getY(),
+                controller1.getRightX(),
+                .3
+            )
             telemetry.update()
         }
     }
