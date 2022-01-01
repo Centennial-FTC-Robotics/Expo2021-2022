@@ -71,6 +71,10 @@ class Vector(private var x: Double, private var y: Double) {
         return y
     }
 
+    override fun toString(): String {
+        return "Vector(x=$x, y=$y)"
+    }
+
     companion object {
         fun add(v1: Vector, v2: Vector): Vector {
             val copy = Vector(v1.getX(), v1.getY())

@@ -1,4 +1,4 @@
-package expo.util
+package expo.gamepad
 
 class ButtonToggle(private val gamepad: ExpoGamepad, private val button: Button, private var toggle: Boolean) {
     private var current: Boolean = false
