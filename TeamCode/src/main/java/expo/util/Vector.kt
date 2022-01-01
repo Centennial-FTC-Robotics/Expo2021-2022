@@ -1,4 +1,4 @@
-package expo.gamepad
+package expo.util
 
 import kotlin.math.*
 
