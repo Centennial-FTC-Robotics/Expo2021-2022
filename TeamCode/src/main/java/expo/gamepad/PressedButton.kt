@@ -1,4 +1,4 @@
-package expo.util
+package expo.gamepad
 
 /**
  * This class is used to track the state of a button.
