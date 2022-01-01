@@ -1,7 +1,10 @@
-package expo.util
+package expo.gamepad
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.Gamepad
+import expo.gamepad.ButtonToggle
+import expo.gamepad.PressedButton
+import expo.util.Vector
 import java.util.*
 import kotlin.collections.HashMap
 
