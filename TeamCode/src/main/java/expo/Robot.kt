@@ -8,7 +8,6 @@ import expo.logger.Logger
 import expo.subsystems.*
 import expo.util.ExpoOpMode
 import expo.util.Vector
-import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.opMode
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil
 import java.io.File
 
