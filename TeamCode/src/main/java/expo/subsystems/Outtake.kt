@@ -23,6 +23,7 @@ class Outtake : Subsystem {
         carriage = opMode.hardwareMap.get(Servo::class.java, "carriage")
         joint1 = opMode.hardwareMap.get(Servo::class.java, "joint1")
         joint2 = opMode.hardwareMap.get(Servo::class.java, "joint2")
+
         weedJoke3 = opMode.hardwareMap.get(Servo::class.java, "weedJoke3")
 
         OuttakeCommand(OuttakePosition.REST).schedule()
