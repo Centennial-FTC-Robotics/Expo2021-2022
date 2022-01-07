@@ -19,13 +19,17 @@ object Robot {
     val odometry = Odometry()
     val odoLifter = OdometryLifter()
     val hubs = ArrayList<LynxModule>()
+    val intake = Intake()
+    val outtake = Outtake()
+    val spinner = CarouselSpinner()
+    val wallSensors = WallSensors()
 
     lateinit var opMode: ExpoOpMode
 
     private val odoData: File = AppUtil.getInstance().getSettingsFile("odoData.txt")
 
 
-    private val subsystems = listOf(drivetrain, IMU, odometry, odoLifter)
+    private val subsystems = listOf(drivetrain, IMU, odometry, odoLifter, intake, outtake, spinner, wallSensors)
     fun initialize(opMode: ExpoOpMode) {
         this.opMode = opMode
         hubs.addAll(opMode.hardwareMap.getAll(LynxModule::class.java))
