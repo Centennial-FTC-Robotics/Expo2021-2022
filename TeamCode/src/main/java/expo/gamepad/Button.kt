@@ -1,4 +1,4 @@
-package expo.util
+package expo.gamepad
 
 enum class Button {
     A,
@@ -15,4 +15,5 @@ enum class Button {
     RIGHT_BUMPER,
     LEFT_STICK,
     RIGHT_STICK
+
 }

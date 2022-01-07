@@ -1,16 +1,23 @@
-package expo.util
+package expo.gamepad
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.Gamepad
+import expo.gamepad.ButtonToggle
+import expo.gamepad.PressedButton
+import expo.util.Vector
 import java.util.*
+import kotlin.collections.HashMap
 
 class ExpoGamepad(private val gamepad: Gamepad) {
     var toggles = HashMap<Button, ButtonToggle>()
+    var pressedButtons = HashMap<Button, PressedButton>()
 
     fun update() {
         for (entry: Map.Entry<Button, ButtonToggle> in toggles.entries) {
             val toggle: ButtonToggle = entry.value
             toggle.update()
         }
+
     }
 
     fun registerToggle(button: Button) {
@@ -21,9 +28,15 @@ class ExpoGamepad(private val gamepad: Gamepad) {
         toggles[button] = ButtonToggle(this, button, state)
     }
 
+    fun registerPressedButton(button: Button) {
+        pressedButtons[button] = PressedButton(this, button)
+    }
+
+    fun getPressedButton(button: Button) = pressedButtons.getValue((button)).getState()
+
+
     fun getToggle(button: Button): Boolean {
-        val toggle: ButtonToggle = toggles[button] ?: return false
-        return toggle.getValue()
+        return toggles.getValue(button).getValue()
     }
 
     fun getButton(button: Button): Boolean {
@@ -50,7 +63,7 @@ class ExpoGamepad(private val gamepad: Gamepad) {
     }
 
     fun getLeftY(): Double {
-        return gamepad.left_stick_y.toDouble()
+        return -gamepad.left_stick_y.toDouble()
     }
 
     fun getRightX(): Double {
@@ -67,5 +80,28 @@ class ExpoGamepad(private val gamepad: Gamepad) {
         val controlVector = Vector(getLeftX(), getLeftY())
         controlVector.rotate(angle)
         return controlVector
+    }
+
+    fun rumble(left: Double, right: Double, duration: Int) {
+        gamepad.rumble(left, right, duration)
+    }
+
+    fun rumble(duration: Int) {
+        gamepad.rumble(duration)
+    }
+
+    fun rumbleBlips(count: Int) {
+        gamepad.rumbleBlips(count)
+    }
+
+    fun rumbleCustom(customEffect: Gamepad.RumbleEffect) {
+        gamepad.runRumbleEffect(customEffect)
+    }
+
+    fun printControlVector(opMode: LinearOpMode) {
+        val vector = getControllerVector()
+        opMode.telemetry.addData("leftX", vector.getX())
+        opMode.telemetry.addData("leftY", vector.getY())
+
     }
 }

@@ -1,7 +1,8 @@
 package org.firstinspires.ftc.teamcode.tests
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import expo.util.Button
+import com.qualcomm.robotcore.hardware.Gamepad
+import expo.gamepad.Button
 import expo.util.ExpoOpMode
 
 @TeleOp
@@ -9,12 +10,16 @@ class ExpoGamepadTest : ExpoOpMode() {
     override fun runOpMode() {
         super.runOpMode()
 
-        controller1.registerToggle(Button.A)
+        controller1.rumble(5000)
 
+        controller1.registerPressedButton(Button.A)
         while (opModeIsActive()) {
             updateGamepads()
-
-            telemetry.addData("A Toggle", controller1.getToggle(Button.A))
+            if(controller1.getPressedButton(Button.A)) {
+                telemetry.addData("A IS PRESSED", null)
+                telemetry.update()
+                gamepad1.rumble(1000)
+            }
             telemetry.update()
         }
     }
