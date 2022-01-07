@@ -19,8 +19,6 @@ class Odometry : Subsystem {
     private var backRadius = 7.9
     private var middleRadius = 4.528
 
-//    private var backRadius = 13.572254335260116
-//    private var middleRadius = 0.3709865532
 
     private var oldBack = 0
     private var oldMiddle = 0
@@ -42,10 +40,10 @@ class Odometry : Subsystem {
 
 
     private lateinit var opMode: LinearOpMode
-
     override fun initialize(opMode: LinearOpMode) {
         back = opMode.hardwareMap.dcMotor["back odo"]
         middle = opMode.hardwareMap.dcMotor["intake"]
+
         this.opMode = opMode
 
         back.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
@@ -99,6 +97,9 @@ class Odometry : Subsystem {
             val strafeRadius = ((deltaBack) / deltaTheta) - backRadius
             val turnRadius = ((deltaMiddle) / deltaTheta)
 
+
+//            deltaX = turnRadius * sin(deltaTheta) + strafeRadius * (1 - cos(deltaTheta))
+//            deltaY = turnRadius * (cos(deltaTheta) - 1) + strafeRadius * sin(deltaTheta)
             deltaX = turnRadius * (cos(deltaTheta) - 1) + strafeRadius * sin(deltaTheta)
             deltaY = turnRadius * sin(deltaTheta) + strafeRadius * (1 - cos(deltaTheta))
         }

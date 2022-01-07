@@ -34,8 +34,6 @@ class Drivetrain : Subsystem {
     private val distanceInWheelRotation: Double = wheelDiameter * Math.PI
     private val ticksPerInch = distanceInWheelRotation / ticksPerWheelRotation
 
-    private val turnController: PIDController = PIDController(1.0 / 150, 0.006, 0.001)
-
     private var currentPos = Vector(0.0, 0.0)
     private var robotCentric = Vector(0.0, 0.0)
     private var power: Vector = Vector(0.0, 0.0)
@@ -45,6 +43,7 @@ class Drivetrain : Subsystem {
         val xController: PIDController = PIDController(.0186, 2.0E-4, .003)
         val yController: PIDController = PIDController(.0186, 2.0E-4, .003)
         val angleController: PIDController = PIDController(.002222, 0.001, 0.0)
+        val turnController: PIDController = PIDController(1.0 / 150, 0.006, 0.001)
     }
 
     override fun initialize(opMode: LinearOpMode) {

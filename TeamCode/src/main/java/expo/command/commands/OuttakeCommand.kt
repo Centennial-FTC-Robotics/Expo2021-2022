@@ -22,7 +22,7 @@ class OuttakeCommand(private val position: Outtake.OuttakePosition) : Command {
                 } else if (stage == 0) {
                     if (timer.milliseconds() > 300) {
                         timer.reset()
-                        Robot.outtake.setJoint2(.9)
+                        Robot.outtake.setJoint2(1.0)
                         stage++
                     }
                 } else if (stage == 1) {

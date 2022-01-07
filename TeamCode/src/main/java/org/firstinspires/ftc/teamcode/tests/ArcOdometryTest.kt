@@ -13,7 +13,8 @@ class ArcOdometryTest : ExpoOpMode() {
         var pos: Pair<Double, Double>
         var encoders: Pair<Int, Int>
         while (opModeIsActive()) {
-            Robot.update()
+            updateGamepads()
+            robot.drivetrain.updatePos()
             pos = robot.odometry.getPairPos()
             encoders = robot.odometry.getEncoders()
             telemetry.addData("X", pos.first)
