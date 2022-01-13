@@ -44,7 +44,7 @@ class OuttakeCommand(private val position: Outtake.OuttakePosition) : Command {
                         stage++
                     }
                 } else if (stage == 1) {
-                    if (timer.milliseconds() > 1500) {
+                    if (timer.milliseconds() > 1000) {
                         isFinished = true
                     } else if (timer.milliseconds() > 600) {
                         Robot.outtake.setCarriagePosition(.1)
@@ -59,7 +59,7 @@ class OuttakeCommand(private val position: Outtake.OuttakePosition) : Command {
                     timer.reset()
                     stage++
                 } else if (stage == 0) {
-                    if (timer.milliseconds() > 1500) {
+                    if (timer.milliseconds() > 1000) {
                         isFinished = true
                     } else if (timer.milliseconds() > 600) {
                         Robot.outtake.setCarriagePosition(.1)
@@ -79,10 +79,25 @@ class OuttakeCommand(private val position: Outtake.OuttakePosition) : Command {
                         timer.reset()
                     }
                 } else if (stage == 1) {
-                    if (timer.milliseconds() > 1500) {
+                    if (timer.milliseconds() > 1000) {
                         isFinished = true
                         Robot.outtake.setCarriagePosition(.1)
                     } else if (timer.milliseconds() > 600) {
+                        Robot.outtake.setCarriagePosition(.1)
+                    }
+                }
+            }
+            Outtake.OuttakePosition.SECOND -> {
+                if (stage == -1) {
+                    Robot.outtake.setCarriagePosition(.6)
+                    Robot.outtake.setJoint3(.57)
+                    Robot.outtake.setJoint2(.2)
+                    timer.reset()
+                    stage++
+                } else if (stage == 0) {
+                    if (timer.milliseconds() > 2500) {
+                        isFinished = true
+                    } else if (timer.milliseconds() > 2000) {
                         Robot.outtake.setCarriagePosition(.1)
                     }
                 }

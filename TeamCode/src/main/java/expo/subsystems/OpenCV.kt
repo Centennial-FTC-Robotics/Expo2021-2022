@@ -10,9 +10,6 @@ import org.openftc.easyopencv.OpenCvPipeline
 
 //openCV class that uses the OpenCV library to perform image processing
 class OpenCV : Subsystem {
-    private enum class Position {
-        RIGHT, CENTER, LEFT
-    }
 
     lateinit var camera: OpenCvCamera
 

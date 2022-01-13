@@ -67,6 +67,10 @@ public class AprilTagDetectionPipeline extends OpenCvPipeline
 	private boolean needToSetDecimation;
 	private final Object decimationSync = new Object();
 	
+	private OpenCVAprilTag.Position pos = OpenCVAprilTag.Position.UNKNOWN;
+	
+	
+	
 	public AprilTagDetectionPipeline(double tagsize, double fx, double fy, double cx, double cy)
 	{
 		this.tagsize = tagsize;
@@ -124,6 +128,16 @@ public class AprilTagDetectionPipeline extends OpenCvPipeline
 			Pose pose = poseFromTrapezoid(detection.corners, cameraMatrix, tagsizeX, tagsizeY);
 			drawAxisMarker(input, tagsizeY/2.0, 6, pose.rvec, pose.tvec, cameraMatrix);
 			draw3dCubeMarker(input, tagsizeX, tagsizeX, tagsizeY, 5, pose.rvec, pose.tvec, cameraMatrix);
+		}
+		
+		if (detections == null || detections.size() == 0) {
+			pos = OpenCVAprilTag.Position.LEFT;
+		} else {
+			AprilTagDetection tag = detections.get(0);
+			if(tag.pose.x < 0)
+				pos = OpenCVAprilTag.Position.CENTER;
+			else
+				pos = OpenCVAprilTag.Position.RIGHT;
 		}
 		
 		return input;
@@ -281,6 +295,10 @@ public class AprilTagDetectionPipeline extends OpenCvPipeline
 		Calib3d.solvePnP(points3d, points2d, cameraMatrix, new MatOfDouble(), pose.rvec, pose.tvec, false);
 		
 		return pose;
+	}
+	
+	public OpenCVAprilTag.Position getPos () {
+		return pos;
 	}
 	
 	/*

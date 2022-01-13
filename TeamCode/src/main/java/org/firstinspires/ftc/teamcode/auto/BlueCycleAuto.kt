@@ -3,12 +3,14 @@ package org.firstinspires.ftc.teamcode.auto
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.util.ElapsedTime
 import expo.Robot
+import expo.Subsystem
 import expo.command.Command
 import expo.command.CommandScheduler
 import expo.command.ParallelCommandGroup
 import expo.command.SequentialCommandGroup
 import expo.command.commands.*
 import expo.logger.Logger
+import expo.subsystems.OpenCVAprilTag
 import expo.subsystems.Outtake
 import expo.util.ExpoOpMode
 import expo.util.Vector
@@ -22,23 +24,97 @@ class BlueCycleAuto : ExpoOpMode(Team.BLUE) {
 
     override fun runOpMode() {
         super.runOpMode()
-        val timer = ElapsedTime()
-        Robot.IMU.setStartAngle(90.0)
-        Robot.odometry.setStartPos(0.0, 24.0 * 2.5, Math.PI / 2.0)
+        val pos = Robot.openCVAprilTag.pos
+        var cycle: Command
 
-        val cycles = SequentialCommandGroup()
 
-        for (i in 0..1) {
-            if (i > 0) {
-                cycles.addCommands(
+        when (pos) {
+            OpenCVAprilTag.Position.CENTER -> {
+                cycle = ParallelCommandGroup(
                     MoveToPositionCommand(
                         Vector(0.0, allianceHub.getY()),
                         0.0,
                         headingTolerance = 5.0,
                         tolerance = 1.5
                     ),
+                    OuttakeCommand(Outtake.OuttakePosition.SECOND)
                 )
             }
+            OpenCVAprilTag.Position.RIGHT -> {
+
+                cycle = SequentialCommandGroup(
+                    MoveToPositionCommand(
+                        Vector(0.0, allianceHub.getY()),
+                        0.0,
+                        headingTolerance = 5.0,
+                        tolerance = 1.5
+                    ),
+                    object : Command {
+                        val timer = ElapsedTime()
+                        override var isFinished: Boolean = false
+                        override fun init() {
+                            Robot.intake.setJointPosition(1.0)
+                            timer.reset()
+                        }
+
+                        override fun update() {
+                            if (timer.milliseconds() > 1300) {
+                                Robot.intake.setJointPosition(0.0)
+                                isFinished = true
+                            }
+                        }
+
+                        override fun requiredSubsystems(): MutableSet<Subsystem> {
+                            return mutableSetOf(Robot.intake)
+                        }
+                    },
+                    object : Command {
+                        val timer = ElapsedTime()
+                        override var isFinished: Boolean = false
+                        override fun init() {
+                            Robot.intake.setPower(-.4)
+                            timer.reset()
+                        }
+
+                        override fun update() {
+                            if (timer.milliseconds() > 1300) {
+                                Robot.intake.setJointPosition(0.0)
+                                isFinished = true
+                            }
+                        }
+
+                        override fun requiredSubsystems(): MutableSet<Subsystem> {
+                            return mutableSetOf(Robot.intake)
+                        }
+                    },
+
+                    )
+            }
+            else -> {
+
+                cycle = SequentialCommandGroup(
+                    MoveToPositionCommand(
+                        Vector(0.0, allianceHub.getY()),
+                        0.0,
+                        headingTolerance = 5.0,
+                        tolerance = 1.5
+                    ),
+                    OuttakeCommand(Outtake.OuttakePosition.MIDDLE)
+                )
+            }
+        }
+
+        val timer = ElapsedTime()
+        Robot.IMU.setStartAngle(90.0)
+        Robot.odometry.setStartPos(0.0, 24.0 * 3.5, Math.PI / 2.0)
+
+        val cycles = SequentialCommandGroup()
+
+        for (i in 0..1) {
+            cycles.addCommands(
+                cycle
+            )
+
             var yMod = 0.0
             var xMod = 0.0
             if (i == 1) {
@@ -46,18 +122,6 @@ class BlueCycleAuto : ExpoOpMode(Team.BLUE) {
                 xMod = 10.0
             }
             cycles.addCommands(
-                ParallelCommandGroup(
-                    //move to alliance hub and get ready to outtake
-                    MoveToPositionCommand(
-                        Vector(allianceHub.getX() + xMod, allianceHub.getY() - yMod),
-                        90.0,
-                        headingTolerance = 5.0,
-                        tolerance = 1.5
-                    ),
-//                    SlidesCommand(650),
-                ),
-                //outtake once we get there
-                OuttakeCommand(Outtake.OuttakePosition.MIDDLE),
                 OuttakeCommand(Outtake.OuttakePosition.REST),
                 //rotate to face the warehouse
                 ParallelCommandGroup(

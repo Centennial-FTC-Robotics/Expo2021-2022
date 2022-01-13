@@ -31,7 +31,7 @@ class IntakeCommand(private var state: Int) : Command {
                 state++
                 timer.reset()
             } else if (timer.milliseconds() > 500) {
-                Robot.intake.setPower(0.4)
+                Robot.intake.setPower(0.45)
             }
         } else if (state == 3) {
             if (timer.milliseconds() > 500) {

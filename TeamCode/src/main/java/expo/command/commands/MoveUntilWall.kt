@@ -5,12 +5,13 @@ import expo.command.Command
 import expo.logger.Logger
 import expo.util.ExpoOpMode
 
-open class MoveUntilWall : Command {
+open class MoveUntilWall(var modifier: Double) : Command {
     override var isFinished: Boolean = false
-    var modifier = 1.0
+
+    constructor() : this(if (Robot.opMode.team == ExpoOpMode.Team.BLUE) 1.0 else -1.0) {
+    }
 
     init {
-        modifier = if (Robot.opMode.team == ExpoOpMode.Team.BLUE) 1.0 else -1.0
         Logger.getInstance().addItem("MoveUntilWall modifier", modifier).isRetained = true
     }
 

@@ -19,7 +19,7 @@ class CarouselCommand(val team: ExpoOpMode.Team = ExpoOpMode.Team.BLUE) : Comman
     }
 
     override fun update() {
-        if (timer.milliseconds() > 750) {
+        if (timer.milliseconds() > 3000) {
             Robot.spinner.setPower(0.0)
             isFinished = true
         }

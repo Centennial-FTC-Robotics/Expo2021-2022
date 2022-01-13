@@ -50,6 +50,6 @@ class Outtake : Subsystem {
     }
 
     enum class OuttakePosition {
-        REST, RIGHT, MIDDLE, LEFT
+        REST, RIGHT, MIDDLE, LEFT, SECOND
     }
 }

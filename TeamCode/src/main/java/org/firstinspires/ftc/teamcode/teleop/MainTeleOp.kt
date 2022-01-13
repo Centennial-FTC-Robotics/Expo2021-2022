@@ -51,6 +51,7 @@ class MainTeleOp : ExpoOpMode() {
 
 
         var intakePowerCommand: Command? = null
+        var carouselPowerCommand: Command? = null
         var outtakePos = Outtake.OuttakePosition.MIDDLE
         var factor: Double
         while (opModeIsActive()) {
@@ -72,7 +73,7 @@ class MainTeleOp : ExpoOpMode() {
                 Drivetrain.angleController.reset()
             }
 
-            val cVector = controller1.getControllerVector(Robot.odometry.getHeading())
+            val cVector = controller1.getControllerVector()
 
             factor = if (gamepad1.right_trigger > 0.0 || gamepad1.left_trigger > 0.0) {
                 1.0
@@ -97,7 +98,7 @@ class MainTeleOp : ExpoOpMode() {
                 if (intakePowerCommand == null) {
                     intakePowerCommand = object : Command {
                         override fun update() {
-                            Robot.intake.setPower(.4)
+                            Robot.intake.setPower(.3)
                         }
 
                         override fun done() {
@@ -114,7 +115,7 @@ class MainTeleOp : ExpoOpMode() {
                 if (intakePowerCommand == null) {
                     intakePowerCommand = object : Command {
                         override fun update() {
-                            Robot.intake.setPower(-.4)
+                            Robot.intake.setPower(-.3)
                         }
 
                         override fun done() {
@@ -123,8 +124,6 @@ class MainTeleOp : ExpoOpMode() {
 
                         override val isCancelable: Boolean
                             get() = true
-
-
                     }
                     intakePowerCommand.schedule()
                 }
@@ -180,17 +179,38 @@ class MainTeleOp : ExpoOpMode() {
 
             //carousel
             if (controller2.getPressedButton(Button.X)) {
-                CarouselCommand(Robot.opMode.team).schedule()
+                CarouselCommand(Team.RED).schedule()
             }
 
             if (controller2.getPressedButton(Button.LEFT_BUMPER)) {
                 CarouselCommand(Team.BLUE).schedule()
             }
 
-            if (controller2.getPressedButton(Button.RIGHT_BUMPER)) {
-                CarouselCommand(Team.RED).schedule()
-            }
+            if (controller2.getButton(Button.RIGHT_BUMPER)) {
+                if (carouselPowerCommand == null) {
+                    carouselPowerCommand = object : Command {
+                        override fun update() {
+                            Robot.spinner.setPower(-.5)
+                        }
 
+                        override fun done() {
+                            Robot.spinner.setPower(0.0)
+                        }
+
+                        override val isCancelable: Boolean
+                            get() = true
+
+                        override val isFinished: Boolean
+                            get() = false
+                    }
+                    carouselPowerCommand.schedule()
+                }
+            } else {
+                if (carouselPowerCommand != null) {
+                    CommandScheduler.instance.forceInterrupt(carouselPowerCommand)
+                    carouselPowerCommand = null
+                }
+            }
 
         }
     }

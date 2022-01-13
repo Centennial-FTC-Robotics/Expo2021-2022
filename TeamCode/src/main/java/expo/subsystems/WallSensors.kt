@@ -19,16 +19,16 @@ class WallSensors : Subsystem {
         CommandScheduler.instance.registerSubsystem(this)
     }
 
-    fun getBlue() = !blue.state
+        fun getBlue() = !blue.state
 
-    fun getRed() = !red.state
+        fun getRed() = !red.state
 
     override fun update() {
-        if (getBlue()) {
-            Robot.odometry.setStartPos(0.0, Robot.odometry.getPos().getY(), Robot.odometry.getHeading())
-        } else if (getRed()) {
-            Robot.odometry.setStartPos(144.0, Robot.odometry.getPos().getY(), Robot.odometry.getHeading())
-        }
+//        if (getBlue()) {
+//            Robot.odometry.setStartPos(0.0, Robot.odometry.getPos().getY(), Robot.odometry.getHeading())
+//        } else if (getRed()) {
+//            Robot.odometry.setStartPos(144.0, Robot.odometry.getPos().getY(), Robot.odometry.getHeading())
+//        }
     }
 
 }

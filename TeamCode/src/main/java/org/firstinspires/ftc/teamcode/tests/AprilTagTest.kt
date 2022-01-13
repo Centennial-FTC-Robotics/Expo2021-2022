@@ -7,8 +7,6 @@ import expo.util.ExpoOpMode
 import org.openftc.apriltag.AprilTagDetection
 
 
-
-
 @TeleOp(name = "April Tag Tester", group = "Tests")
 class AprilTagTest: ExpoOpMode() {
     val FEET_PER_METER = 3.28084
@@ -35,6 +33,7 @@ class AprilTagTest: ExpoOpMode() {
                 Logger.getInstance().addItem("FPS", Robot.openCVAprilTag.camera.getFps())
                 Logger.getInstance().addItem("Overhead ms", Robot.openCVAprilTag.camera.getOverheadTimeMs())
                 Logger.getInstance().addItem("Pipeline ms", Robot.openCVAprilTag.camera.getPipelineTimeMs())
+                Logger.getInstance().addItem("Position", Robot.openCVAprilTag.pos, -1)
 
                 // If we don't see any tags
                 if (detections.size == 0) {

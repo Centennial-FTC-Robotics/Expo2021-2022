@@ -23,40 +23,46 @@ package expo.subsystems;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
+import expo.Subsystem;
+import expo.command.CommandScheduler;
+import expo.logger.Logger;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvInternalCamera;
-import org.openftc.easyopencv.OpenCvInternalCamera2;
 
-import java.util.ArrayList;
-
-import expo.Subsystem;
-import expo.logger.Logger;
-import expo.subsystems.AprilTagDetectionPipeline;
+import java.util.List;
 
 public class OpenCVAprilTag implements Subsystem {
+	@Override
+	public void update () {
+	}
+	
+	public enum Position {
+		RIGHT, CENTER, LEFT, UNKNOWN
+	}
+	
 	public OpenCvCamera camera;
 	public AprilTagDetectionPipeline aprilTagDetectionPipeline;
 	
+	
 	// Lens intrinsics
 	// UNITS ARE PIXELS
-	// NOTE: this calibration is for the C920 webcam at 800x448.
-	// You will need to do your own calibration for other configurations!
-	double fx = 578.272;
-	double fy = 578.272;
-	double cx = 402.145;
-	double cy = 221.506;
+	double fx = 822.317;
+	double fy = 822.317;
+	double cx = 319.495;
+	double cy = 242.502;
 	
 	// UNITS ARE METERS
 	double tagsize = 0.166;
 	
+	public Position getPos () {
+		return aprilTagDetectionPipeline.getPos();
+	}
+	
 	@Override
-	public void initialize(LinearOpMode opMode) {
+	public void initialize (LinearOpMode opMode) {
 		int cameraMonitorViewId = opMode.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", opMode.hardwareMap.appContext.getPackageName());
 		camera = OpenCvCameraFactory.getInstance().createWebcam(opMode.hardwareMap.get(WebcamName.class, "cam"), cameraMonitorViewId);
 		aprilTagDetectionPipeline = new AprilTagDetectionPipeline(tagsize, fx, fy, cx, cy);
@@ -78,10 +84,7 @@ public class OpenCVAprilTag implements Subsystem {
 		});
 		
 		FtcDashboard.getInstance().startCameraStream(camera,0);
+		CommandScheduler.Companion.getInstance().registerSubsystem(this);
 	}
 	
-	@Override
-	public void update () {
-	
-	}
 }
